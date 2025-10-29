@@ -1,0 +1,131 @@
+import { StyleSheet } from 'react-native';
+
+export const checkoutStyle = () => {
+    return StyleSheet.create({
+        shippingNameContainer: {
+            flexDirection: "row",
+            marginHorizontal: 7,
+            marginTop: 8,
+        },
+        shippingDetailContainer: {
+            flexDirection: "row",
+            justifyContent: "space-between",
+            marginHorizontal: 7,
+        },
+        rightArrow: {
+            width: 20,
+            height: 20,
+            marginTop: 10,
+        },
+        addressInfoContainer: {
+            backgroundColor: "#FAF7F0",
+            borderWidth: 1,
+            borderColor: "rgba(0,0,0,0.2)",
+            borderRadius: 10,
+            width: "100%",
+            flex: 1,
+            gap: 6,
+        },
+        addressContainer: {
+            width: "100%",
+            height: 150,
+            flexDirection: "column",
+            gap: 10,
+        },
+        addressInfoText:{
+            fontSize: 14,
+        },
+        totalContainer: {
+            backgroundColor: "#FAF7F0",
+            borderWidth: 1,
+            borderColor: "rgba(0,0,0,0.2)",
+            borderRadius: 10,
+            width: "100%",
+            height: 70,
+            flexDirection: "row",
+            justifyContent: "space-between",
+            marginBottom: 30,
+        },
+        totalPriceContainer: {
+            flexDirection: "row",
+            gap: 5,
+            alignSelf: "center",
+            marginHorizontal: 7,
+        },
+        totalFont: {
+            fontSize: 16,
+            fontWeight: "bold",
+        },
+        orderButton: {
+            backgroundColor: "#FFEB91",
+            borderColor: "#FDE681",
+            borderWidth: 1,
+            width: "30%",
+            height: 30,
+            alignItems: "center",
+            alignSelf: "center",
+            borderRadius: 20,
+            padding: 5,
+            marginRight: 7,
+        },
+        paymentDetailsOuter: {
+            flexDirection: "column",
+            height: 160,
+            gap: 10,
+        },
+        paymentDetailsContainer: {
+            backgroundColor: "#FAF7F0",
+            borderWidth: 1,
+            borderColor: "rgba(0,0,0,0.2)",
+            borderRadius: 10,
+            flex: 1,
+            flexDirection: "column",
+            gap: 8,
+            paddingTop: 14,
+        },
+        paymentBreakdown: {
+            flexDirection: "row",
+            justifyContent: "space-between",
+        },
+        paymentDetailRight: {
+            fontSize: 13,
+            marginLeft: 14,
+            fontWeight: 400,
+        },
+        paymentDetailLeft: {
+            fontSize: 13,
+            marginRight: 14,
+        },
+        paymentMethodOuter: {
+            height: 200,
+            flexDirection: "column",
+            gap: 10,
+        },
+        paymentMethodContainer: {
+            borderWidth: 1,
+            flex: 1,
+            alignItems: "center",
+            gap: 10,
+            paddingTop: 27,
+            backgroundColor: "#FAF7F0",
+            borderColor: "rgba(0,0,0,0.2)",
+            borderRadius: 10,
+        },
+        paymentOption: {
+            flexDirection: "row",
+            width: "90%",
+            height: 50,
+            borderWidth: 1,
+            borderRadius: 20,
+            alignItems: "center",
+            backgroundColor: "#FFEB91",
+            borderColor: "#FDE681",
+        },
+        paymentOptionElements: {
+            flexDirection: "row",
+            justifyContent: "space-between",
+            marginLeft: 20,
+            fontWeight: 600,
+        },
+    })
+}
