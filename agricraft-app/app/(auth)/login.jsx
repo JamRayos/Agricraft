@@ -1,10 +1,34 @@
-import {Text, View, TextInput, Image, TouchableOpacity} from "react-native";
+import React, { useState } from "react";
+import { Text, View, TextInput, Image, TouchableOpacity, Alert } from "react-native";
 import { inputStyles } from "../../assets/styles/inputStyles";
 import { useRouter } from "expo-router";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../../firebaseConfig";
+
+
 
 export default function Login() {
     const styles = inputStyles();
     const router = useRouter();
+
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+
+    const handleLogin = async () => {
+        if (!email || !password) {
+            Alert.alert("Error", "Please enter email and password.");
+            return;
+        }
+
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+            Alert.alert("Success", "Welcome back!");
+            router.push("/(page)/homepage");
+        } catch (error) {
+            Alert.alert("Login Failed", error.message);
+        }
+    };
+
     return (
 
         <View style={styles.container}>
@@ -25,6 +49,8 @@ export default function Login() {
                 autoCapitalize="none"
                 placeholder="Email"
                 placeholderTextColor = "#9A8478"
+                value={email}
+                onChangeText={setEmail}
             />
 
             <TextInput
@@ -32,9 +58,11 @@ export default function Login() {
                 autoCapitalize="none"
                 placeholder="Password"
                 placeholderTextColor = "#9A8478"
+                value={password}
+                onChangeText={setPassword}
             />
 
-            <TouchableOpacity style={[styles.button, styles.shadows]} onPress={() => router.push("/(page)/homepage")}>
+            <TouchableOpacity style={[styles.button, styles.shadows]} onPress={handleLogin}>
                 <Text>Login</Text>
             </TouchableOpacity>
 
