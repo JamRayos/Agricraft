@@ -5,11 +5,10 @@ import { inputStyles } from "../../assets/styles/inputStyles";
 import { useRouter } from "expo-router";
 import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import * as ImagePicker from "expo-image-picker";
-import { auth, db, storage } from "../../firebaseConfig";
+import { auth, db } from "../../firebaseConfig";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { shop } from "../../assets/styles/shop";
-import * as FileSystem from "expo-file-system/legacy";
-import { ref, uploadString, getDownloadURL } from "firebase/storage";
+
 
 const page = () => {
 
@@ -25,6 +24,7 @@ const page = () => {
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [image, setImage] = useState(null);
+    const [imageBase64, setImageBase64] = useState("");
 
     useEffect(() => {
         (async () => {
@@ -36,21 +36,20 @@ const page = () => {
     }, [])
 
     const pickImage = async () => {
-        try{
+        try {
             const result = await ImagePicker.launchImageLibraryAsync({
-                mediaType: ImagePicker.MediaTypeOptions.Images,
-                allowEditing: true,
-                aspectRatio: [4,3],
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                allowsEditing: true,
+                aspect: [4, 3],
                 quality: 1,
+                base64: true // important!
             });
-
-            if (!result.canceled){
-                const picked = result.assets[0];
-                setImage(picked.uri);
-                console.log("Picked image: ", picked.uri);
+            if (!result.canceled) {
+                setImage(result.assets[0].uri);
+                setImageBase64(result.assets[0].base64);
             }
         } catch (error) {
-            console.log('Error picking image: ', error);
+            Alert.alert("Image Picker Error", error.message);
         }
     };
 
@@ -63,61 +62,32 @@ const page = () => {
             Alert.alert("Error", "Passwords do not match.");
             return;
         }
-
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
-
             await sendEmailVerification(user);
 
-            let imageUrl = "";
-
-            if (image) {
-                try {
-                    console.log("Uploading image from:", image);
-
-                    // Convert the local URI to a base64 string using getContentUriAsync first
-                    const fileUri = await FileSystem.getContentUriAsync(image);
-                    console.log("Using content URI:", fileUri);
-
-                    // Then actually read it as Base64
-                    const base64Data = await FileSystem.readAsStringAsync(image, {
-                        encoding: FileSystem.EncodingType.Base64,
-                    });
-
-                    const base64WithHeader = `data:image/jpeg;base64,${base64Data}`;
-
-                    const storageRef = ref(storage, `users/${user.uid}/validId.jpg`);
-
-                    //  Upload as data_url (works in Expo Go)
-                    await uploadString(storageRef, base64WithHeader, "data_url");
-
-                    imageUrl = await getDownloadURL(storageRef);
-                    console.log("Upload success:", imageUrl);
-                } catch (error) {
-                    console.log("Upload failed:", error);
-                }
+            let validId = "";
+            if (imageBase64) {
+                validId = `data:image/jpeg;base64,${imageBase64}`;
             }
 
-
-
-            // Save user details immediately, but mark emailVerified as false
             await setDoc(doc(db, "users", user.uid), {
                 firstName,
                 middleName,
                 lastName,
                 email,
                 phoneNumber: cellphone,
-                validId: imageUrl,
-                validIdStatus: imageUrl ? "pending" : "missing",
+                validId: validId, // <-- Save base64 string here
+                validIdStatus: validId ? "pending" : "missing",
                 emailVerified: false,
+                createdAt: serverTimestamp(),
             });
 
             Alert.alert(
                 "Verify Your Email",
                 "We’ve sent a verification link to your email. Please verify before logging in."
             );
-
             auth.signOut();
             router.push("/(auth)/login");
         } catch (error) {
@@ -125,6 +95,7 @@ const page = () => {
             Alert.alert("Registration Error", error.message);
         }
     };
+
 
     return (
         <View style={styles.container}>
