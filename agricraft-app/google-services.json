@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "519072939525",
+    "project_id": "agricraft-market",
+    "storage_bucket": "agricraft-market.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:519072939525:android:495f2a86795fba3fe9e66c",
+        "android_client_info": {
+          "package_name": "com.agricraft"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC-MPw6kkAyaSpk4VQ6PQwwkDv0Lv0nyoc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
