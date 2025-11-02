@@ -6,5 +6,5 @@ import { router } from "expo-router";
 export default function Index() {
     return <Redirect href="/(auth)/sign-up" />;
 }
-
+//test
 // the homescreen
