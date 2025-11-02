@@ -1,12 +1,15 @@
+
 import React, { useState, useEffect } from "react";
 import { Text, View, TextInput, TouchableOpacity, Alert, ScrollView } from "react-native";
 import { inputStyles } from "../../assets/styles/inputStyles";
 import { useRouter } from "expo-router";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { auth, db } from "../../firebaseConfig";
-import { doc, setDoc } from "firebase/firestore";
-import {shop} from "../../assets/styles/shop";
-import * as ImagePicker from 'expo-image-picker';
+import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
+import * as ImagePicker from "expo-image-picker";
+import { auth, db, storage } from "../../firebaseConfig";
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { shop } from "../../assets/styles/shop";
+import * as FileSystem from "expo-file-system/legacy";
+import { ref, uploadString, getDownloadURL } from "firebase/storage";
 
 const page = () => {
 
@@ -14,13 +17,13 @@ const page = () => {
     const router = useRouter();
     const shopStyle = shop();
 
-    const [firstName, setFirstName] = useState('');
-    const [middleName, setMiddleName] = useState('');
-    const [lastName, setLastName] = useState('');
-    const [email, setEmail] = useState('');
-    const [cellphone, setCellphone] = useState('');
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
+    const [firstName, setFirstName] = useState("");
+    const [middleName, setMiddleName] = useState("");
+    const [lastName, setLastName] = useState("");
+    const [email, setEmail] = useState("");
+    const [cellphone, setCellphone] = useState("");
+    const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
     const [image, setImage] = useState(null);
 
     useEffect(() => {
@@ -56,7 +59,6 @@ const page = () => {
             Alert.alert("Error", "Please fill in all required fields.");
             return;
         }
-
         if (password !== confirmPassword) {
             Alert.alert("Error", "Passwords do not match.");
             return;
@@ -66,22 +68,57 @@ const page = () => {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
 
-            await updateProfile(user, {
-                displayName: `${firstName} ${lastName}`,
-            });
+            await sendEmailVerification(user);
 
+            let imageUrl = "";
+
+            if (image) {
+                try {
+                    console.log("Uploading image from:", image);
+
+                    // Convert the local URI to a base64 string using getContentUriAsync first
+                    const fileUri = await FileSystem.getContentUriAsync(image);
+                    console.log("Using content URI:", fileUri);
+
+                    // Then actually read it as Base64
+                    const base64Data = await FileSystem.readAsStringAsync(image, {
+                        encoding: FileSystem.EncodingType.Base64,
+                    });
+
+                    const base64WithHeader = `data:image/jpeg;base64,${base64Data}`;
+
+                    const storageRef = ref(storage, `users/${user.uid}/validId.jpg`);
+
+                    //  Upload as data_url (works in Expo Go)
+                    await uploadString(storageRef, base64WithHeader, "data_url");
+
+                    imageUrl = await getDownloadURL(storageRef);
+                    console.log("Upload success:", imageUrl);
+                } catch (error) {
+                    console.log("Upload failed:", error);
+                }
+            }
+
+
+
+            // Save user details immediately, but mark emailVerified as false
             await setDoc(doc(db, "users", user.uid), {
                 firstName,
                 middleName,
                 lastName,
                 email,
                 phoneNumber: cellphone,
-                password,
-                validId: image || "",
-                validIdStatus: "pending",
+                validId: imageUrl,
+                validIdStatus: imageUrl ? "pending" : "missing",
+                emailVerified: false,
             });
 
-            Alert.alert("Success", "Account created successfully!");
+            Alert.alert(
+                "Verify Your Email",
+                "We’ve sent a verification link to your email. Please verify before logging in."
+            );
+
+            auth.signOut();
             router.push("/(auth)/login");
         } catch (error) {
             console.error("Registration Error:", error);
@@ -124,7 +161,6 @@ const page = () => {
                     autoCapitalize="none"
                     keyboardType="email-address"
                     onChangeText={setEmail}
-                    value={email}
                 />
 
                 <TextInput
@@ -141,7 +177,6 @@ const page = () => {
                     placeholderTextColor = "#9A8478"
                     secureTextEntry
                     onChangeText={setPassword}
-                    value={password}
                 />
 
                 <TextInput

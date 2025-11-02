@@ -2,17 +2,17 @@ import React, { useState } from "react";
 import { Text, View, TextInput, Image, TouchableOpacity, Alert } from "react-native";
 import { inputStyles } from "../../assets/styles/inputStyles";
 import { useRouter } from "expo-router";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../../firebaseConfig";
-
-
+import { signInWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
+import { auth, db } from "../../firebaseConfig";
+import { doc, updateDoc } from "firebase/firestore";
 
 export default function Login() {
     const styles = inputStyles();
     const router = useRouter();
 
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [unverifiedUser, setUnverifiedUser] = useState(null);
 
     const handleLogin = async () => {
         if (!email || !password) {
@@ -21,13 +21,45 @@ export default function Login() {
         }
 
         try {
-            await signInWithEmailAndPassword(auth, email, password);
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+
+            if (!user.emailVerified) {
+                setUnverifiedUser(user);
+                Alert.alert(
+                    "Email Not Verified",
+                    "Please verify your email before logging in."
+                );
+                return;
+            }
+
+            // Update Firestore to reflect verification
+            const userRef = doc(db, "users", user.uid);
+            await updateDoc(userRef, { emailVerified: true });
+
             Alert.alert("Success", "Welcome back!");
             router.push("/(page)/homepage");
         } catch (error) {
+            console.error("Login Error:", error);
             Alert.alert("Login Failed", error.message);
         }
     };
+
+    const handleResendVerification = async () => {
+        if (!unverifiedUser) {
+            Alert.alert("Error", "No user to resend verification to.");
+            return;
+        }
+
+        try {
+            await sendEmailVerification(unverifiedUser);
+            Alert.alert("Email Sent", "A new verification email has been sent.");
+        } catch (error) {
+            Alert.alert("Error", error.message);
+        }
+    };
+
+
 
     return (
 
@@ -65,6 +97,12 @@ export default function Login() {
             <TouchableOpacity style={[styles.button, styles.shadows]} onPress={handleLogin}>
                 <Text>Login</Text>
             </TouchableOpacity>
+
+            {unverifiedUser && (
+                <TouchableOpacity style={[styles.button, { backgroundColor: "#e0b300" }]} onPress={handleResendVerification}>
+                    <Text style={{ color: "white" }}>Resend Verification Email</Text>
+                </TouchableOpacity>
+            )}
 
             <View style={styles.line}/>
 
