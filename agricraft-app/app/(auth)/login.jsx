@@ -99,8 +99,8 @@ export default function Login() {
             </TouchableOpacity>
 
             {unverifiedUser && (
-                <TouchableOpacity style={[styles.button, { backgroundColor: "#e0b300" }]} onPress={handleResendVerification}>
-                    <Text style={{ color: "white" }}>Resend Verification Email</Text>
+                <TouchableOpacity style={[styles.button, { backgroundColor: "#FFFFFF" }]} onPress={handleResendVerification}>
+                    <Text style={{ color: "black" }}>Resend Verification Email</Text>
                 </TouchableOpacity>
             )}
 
