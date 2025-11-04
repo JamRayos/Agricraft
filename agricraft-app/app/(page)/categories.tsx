@@ -110,11 +110,11 @@ export default function Categories() {
                         </View>
                     </View>
 
-                    <View>
+                    <TouchableOpacity onPress={() => router.push('/profile')} style={{ alignItems: 'center' }}>
                         <Image source={require('../../assets/images/profile.png')}
-                               style = {{height:37, width:37, marginLeft:8}}/>
-                        <Text style={{marginTop:3, marginLeft:3, fontWeight:'500', color:"white"}}>Profile</Text>
-                    </View>
+                               style={{ height: 37, width: 37, marginLeft: 8 }} />
+                        <Text style={{ marginTop: 3, marginLeft: 3, fontWeight: '500', color: "white" }}>Profile</Text>
+                    </TouchableOpacity>
 
                 </View>
 
