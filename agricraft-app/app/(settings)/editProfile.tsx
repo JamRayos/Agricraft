@@ -88,7 +88,7 @@ export default function Index() {
     return (
         <ScrollView contentContainerStyle={{ paddingBottom: 270 }}>
             <View>
-                {/* Header */}
+
                 <View style={{ flexDirection: "row", marginTop: 50 }}>
                     <TouchableOpacity onPress={() => router.back()}>
                         <Image source={require('../../assets/images/back.png')} style={editProfStyles.arrow} />
@@ -98,7 +98,7 @@ export default function Index() {
 
                 <View style={editProfStyles.line} />
 
-                {/* Profile Image */}
+
                 <Text style={editProfStyles.myProfileText}>My Profile</Text>
                 <View style={editProfStyles.pfpContainer}>
                     <Image
@@ -111,11 +111,11 @@ export default function Index() {
                     />
                 </View>
 
-                {/* Card Container */}
+
                 <View style={editProfStyles.blueCard}>
                     <View style={editProfStyles.beigeCard}>
 
-                        {/* Save Changes Button */}
+
                         <TouchableOpacity
                             onPress={handleSaveChanges}
                             disabled={loading}
@@ -134,7 +134,7 @@ export default function Index() {
                             </View>
                         </TouchableOpacity>
 
-                        {/* Username */}
+
                         <View style={editProfStyles.container}>
                             <Text style={editProfStyles.detailLabel}>Username</Text>
                             <Image source={require('../../assets/images/pencil.png')} style={editProfStyles.pencil} />
@@ -147,7 +147,7 @@ export default function Index() {
                             onChangeText={setUsername}
                         />
 
-                        {/* Bio */}
+
                         <View style={editProfStyles.container}>
                             <Text style={editProfStyles.bioLabel}>Bio</Text>
                             <Image source={require('../../assets/images/pencil.png')} style={editProfStyles.pencil} />
@@ -162,7 +162,7 @@ export default function Index() {
                             onChangeText={setBio}
                         />
 
-                        {/* Birthday */}
+
                         <View style={editProfStyles.container}>
                             <Text style={editProfStyles.detailLabel}>Birthday</Text>
                             <Image source={require('../../assets/images/pencil.png')} style={editProfStyles.pencil} />
@@ -175,7 +175,7 @@ export default function Index() {
                             onChangeText={setBirthday}
                         />
 
-                        {/* Gender */}
+
                         <View style={editProfStyles.container}>
                             <Text style={editProfStyles.detailLabel}>Gender</Text>
                             <Image source={require('../../assets/images/pencil.png')} style={editProfStyles.pencil} />
@@ -195,7 +195,7 @@ export default function Index() {
                             onChange={(item) => setGender(item.value)}
                         />
 
-                        {/* Phone */}
+
                         <View style={editProfStyles.container}>
                             <Text style={editProfStyles.detailLabel}>Phone</Text>
                             <Image source={require('../../assets/images/pencil.png')} style={editProfStyles.pencil} />
@@ -208,7 +208,7 @@ export default function Index() {
                             onChangeText={setPhone}
                         />
 
-                        {/* Email */}
+
                         <View style={editProfStyles.container}>
                             <Text style={editProfStyles.detailLabel}>Email</Text>
                             <Image source={require('../../assets/images/pencil.png')} style={editProfStyles.pencil} />
