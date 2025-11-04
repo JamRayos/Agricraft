@@ -1,7 +1,20 @@
 import { router } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Image, Modal, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { eWalletStyles } from '@/assets/styles/eWalletStyles';
+import { db, auth } from "../../firebaseConfig";
+import { doc, setDoc, onSnapshot } from "firebase/firestore";
+
+type WalletData = {
+    gcash?: {
+        gcashName?: string;
+        gcashNumber?: string;
+    };
+    paymaya?: {
+        payMayaNumber?: string;
+        payMayaPassword?: string;
+    };
+};
 
 export default function EWallet() {
     const [gcashModalVisible, setGcashModalVisible] = useState(false);
@@ -11,25 +24,40 @@ export default function EWallet() {
     const [payMayaNumber, setPayMayaNumber] = useState('');
     const [payMayaPassword, setPayMayaPassword] = useState('');
     const [successModalVisible, setSuccessModalVisible] = useState(false);
+    const [existingData, setExistingData] = useState<WalletData>({});
+    const user = auth.currentUser;
+
+    useEffect(() => {
+        if (!user) return;
+        const ref = doc(db, "ewallet", user.uid);
+        const unsub = onSnapshot(ref, (snap) => {
+            if (snap.exists()) setExistingData(snap.data() as WalletData);
+        });
+        return () => unsub();
+    }, [user]);
+
+    const saveWallet = async (type: keyof WalletData, data: any) => {
+        if (!user) return;
+        await setDoc(doc(db, "ewallet", user.uid), { [type]: data }, { merge: true });
+        setSuccessModalVisible(true);
+    };
 
     return (
         <ScrollView>
             <View>
                 <View style={{ flexDirection: "row", marginTop: 50 }}>
                     <TouchableOpacity onPress={() => router.back()}>
-                        <Image source={require('../../assets/images/back.png')}
-                               style={eWalletStyles.arrow}/>
+                        <Image source={require('../../assets/images/back.png')} style={eWalletStyles.arrow}/>
                     </TouchableOpacity>
                     <Text style={eWalletStyles.headerText}>E-Wallets</Text>
                 </View>
                 <View style={eWalletStyles.line}/>
 
-                <Text style = {eWalletStyles.linkAccText}>Link your E-wallet accounts</Text>
+                <Text style={eWalletStyles.linkAccText}>Link your E-wallet accounts</Text>
 
-                <View style = {eWalletStyles.gcashCard}>
-                    <View style = {eWalletStyles.container}>
-                        <Image source = {require('../../assets/images/gCashLogo.png')}
-                               style = {eWalletStyles.eWalletLogo}/>
+                <View style={eWalletStyles.gcashCard}>
+                    <View style={eWalletStyles.container}>
+                        <Image source={require('../../assets/images/gCashLogo.png')} style={eWalletStyles.eWalletLogo}/>
                         <TouchableOpacity onPress={() => setGcashModalVisible(true)}>
                             <Image source={require('../../assets/images/whiteAddButt.png')} style={eWalletStyles.addButt}/>
                         </TouchableOpacity>
@@ -41,7 +69,7 @@ export default function EWallet() {
 
                                     <TextInput
                                         style={eWalletStyles.textInput}
-                                        placeholder="Enter verified GCash Number"
+                                        placeholder={existingData.gcash?.gcashNumber || "Enter verified GCash Number"}
                                         value={gcashNumber}
                                         onChangeText={setGcashNumber}
                                         keyboardType="phone-pad"
@@ -49,7 +77,7 @@ export default function EWallet() {
 
                                     <TextInput
                                         style={eWalletStyles.textInput}
-                                        placeholder="Enter GCash Name.."
+                                        placeholder={existingData.gcash?.gcashName || "Enter GCash Name.."}
                                         value={gcashName}
                                         onChangeText={setGcashName}
                                     />
@@ -65,9 +93,8 @@ export default function EWallet() {
                                         <TouchableOpacity
                                             style={eWalletStyles.linkButt}
                                             onPress={() => {
-                                                console.log('GCash:', gcashName, gcashNumber);
+                                                saveWallet("gcash", { gcashName, gcashNumber });
                                                 setGcashModalVisible(false);
-                                                setSuccessModalVisible(true);
                                             }}
                                         >
                                             <Text style={eWalletStyles.linkText}>Link Account</Text>
@@ -79,10 +106,9 @@ export default function EWallet() {
                     </View>
                 </View>
 
-                <View style = {eWalletStyles.payMayaCard}>
-                    <View style = {eWalletStyles.container}>
-                        <Image source = {require('../../assets/images/payMayaLogo.png')}
-                               style = {eWalletStyles.eWalletLogo}/>
+                <View style={eWalletStyles.payMayaCard}>
+                    <View style={eWalletStyles.container}>
+                        <Image source={require('../../assets/images/payMayaLogo.png')} style={eWalletStyles.eWalletLogo}/>
                         <TouchableOpacity onPress={() => setPayMayaModalVisible(true)}>
                             <Image source={require('../../assets/images/blueAddButtIMG.png')} style={eWalletStyles.addButt}/>
                         </TouchableOpacity>
@@ -94,7 +120,7 @@ export default function EWallet() {
 
                                     <TextInput
                                         style={eWalletStyles.textInput}
-                                        placeholder="Enter PayMaya Number.."
+                                        placeholder={existingData.paymaya?.payMayaNumber || "Enter PayMaya Number.."}
                                         value={payMayaNumber}
                                         onChangeText={setPayMayaNumber}
                                         keyboardType="phone-pad"
@@ -102,7 +128,7 @@ export default function EWallet() {
 
                                     <TextInput
                                         style={eWalletStyles.textInput}
-                                        placeholder="Enter PayMaya Password"
+                                        placeholder={existingData.paymaya?.payMayaPassword || "Enter PayMaya Password"}
                                         value={payMayaPassword}
                                         onChangeText={setPayMayaPassword}
                                         secureTextEntry={true}
@@ -119,9 +145,8 @@ export default function EWallet() {
                                         <TouchableOpacity
                                             style={eWalletStyles.linkButt}
                                             onPress={() => {
-                                                console.log('PayMaya:', payMayaNumber, payMayaPassword);
+                                                saveWallet("paymaya", { payMayaNumber, payMayaPassword });
                                                 setPayMayaModalVisible(false);
-                                                setSuccessModalVisible(true);
                                             }}
                                         >
                                             <Text style={eWalletStyles.linkText}>Link Account</Text>
@@ -145,13 +170,11 @@ export default function EWallet() {
                         onPress={() => setSuccessModalVisible(false)}
                     >
                         <View style={eWalletStyles.modalBox}>
-                            <Image source={require('../../assets/images/sumaksesIMG.png')}
-                                   style = {eWalletStyles.successIMG}/>
+                            <Image source={require('../../assets/images/sumaksesIMG.png')} style={eWalletStyles.successIMG}/>
                             <Text style={eWalletStyles.successTitle}>E-wallet Linking Successful!</Text>
                         </View>
                     </TouchableOpacity>
                 </Modal>
-
             </View>
         </ScrollView>
     );
