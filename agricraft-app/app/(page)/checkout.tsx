@@ -33,7 +33,7 @@ export default function checkout() {
                         <Text style={styles.header}>Shipping Address</Text>
                         <View style={[checkoutStyles.addressInfoContainer, styles.shadows]}>
                             <View style={checkoutStyles.shippingNameContainer}>
-                                <Text style={{fontSize: 18, fontWeight: "bold",}}>SheilaPanot</Text>
+                                <Text style={{fontSize: 18, fontWeight: "bold",}}>Sheila</Text>
                                 <Text style={{marginTop: 5,}}> (+63) 956 925 4856</Text>
                             </View>
 
@@ -73,12 +73,12 @@ export default function checkout() {
                                         }}
                                     />
 
-                                    <Image source={require('../../assets/images/coco.jpg')} style={cartStyle.cartImage} />
+                                    <Image source={require('../../assets/images/apple.png')} style={cartStyle.cartImage} />
                                     <View style={cartStyle.cartInfoContainer}>
                                         <Text style={{
                                             fontSize: 18,
                                             marginBottom: 5,
-                                        }}>Coco Martin</Text>
+                                        }}>Apple</Text>
 
                                         <Text style={{
                                             fontSize: 18,

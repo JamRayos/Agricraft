@@ -86,7 +86,7 @@ export default function Index() {
                 <View style={shopStyle.container}>
 
                     <TouchableOpacity style={shopStyle.card} onPress={() => router.push("/(page)/product")}>
-                        <Image source={require('../../assets/images/coco.jpg')} style={shopStyle.cardImage}/>
+                        <Image source={require('../../assets/images/apple.png')} style={shopStyle.cardImage}/>
                         <Text style={shopStyle.cardText}>Apple</Text>
                         <Text style={shopStyle.cardPrice}>₱16.78</Text>
 
@@ -103,7 +103,7 @@ export default function Index() {
                     </TouchableOpacity>
 
                     <TouchableOpacity style={shopStyle.card} onPress={() => router.push("/(page)/writeReview")}>
-                        <Image source={require('../../assets/images/coco.jpg')} style={shopStyle.cardImage}/>
+                        <Image source={require('../../assets/images/apple.png')} style={shopStyle.cardImage}/>
                         <Text style={shopStyle.cardText}>Apple</Text>
                         <Text style={shopStyle.cardPrice}>₱16.78</Text>
 
@@ -120,7 +120,7 @@ export default function Index() {
                     </TouchableOpacity>
 
                     <View style={shopStyle.card}>
-                        <Image source={require('../../assets/images/coco.jpg')} style={shopStyle.cardImage}/>
+                        <Image source={require('../../assets/images/apple.png')} style={shopStyle.cardImage}/>
                         <Text style={shopStyle.cardText}>Apple</Text>
                         <Text style={shopStyle.cardPrice}>₱16.78</Text>
 
@@ -137,7 +137,7 @@ export default function Index() {
                     </View>
 
                     <View style={shopStyle.card}>
-                        <Image source={require('../../assets/images/coco.jpg')} style={shopStyle.cardImage}/>
+                        <Image source={require('../../assets/images/apple.png')} style={shopStyle.cardImage}/>
                         <Text style={shopStyle.cardText}>Apple</Text>
                         <Text style={shopStyle.cardPrice}>₱16.78</Text>
 
@@ -154,7 +154,7 @@ export default function Index() {
                     </View>
 
                     <View style={shopStyle.card}>
-                        <Image source={require('../../assets/images/coco.jpg')} style={shopStyle.cardImage}/>
+                        <Image source={require('../../assets/images/apple.png')} style={shopStyle.cardImage}/>
                         <Text style={shopStyle.cardText}>Apple</Text>
                         <Text style={shopStyle.cardPrice}>₱16.78</Text>
 
@@ -171,7 +171,7 @@ export default function Index() {
                     </View>
 
                     <View style={shopStyle.card}>
-                        <Image source={require('../../assets/images/coco.jpg')} style={shopStyle.cardImage}/>
+                        <Image source={require('../../assets/images/apple.png')} style={shopStyle.cardImage}/>
                         <Text style={shopStyle.cardText}>Apple</Text>
                         <Text style={shopStyle.cardPrice}>₱16.78</Text>
 

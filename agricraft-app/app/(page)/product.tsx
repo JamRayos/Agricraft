@@ -41,7 +41,7 @@ export default function Product() {
                 </TouchableOpacity>
 
                 <View style = {styles.prodPicture}>
-                    <Image source={require('../../assets/images/frozen.png')}
+                    <Image source={require('../../assets/images/apple.png')}
                            style={styles.prodImage}
                     />
                 </View>
@@ -65,12 +65,12 @@ export default function Product() {
                 <View style={styles.line}/>
 
                 <View style = {styles.store}>
-                    <Image source={require('../../assets/images/frozen.png')}
+                    <Image source={require('../../assets/images/apple.png')}
                            style={styles.storeImg}
                     />
 
                     <TouchableOpacity  onPress={() => router.push('/shop-display')}>
-                        <Text style = {styles.storeName}>Frozen Store</Text>
+                        <Text style = {styles.storeName}>Sheila Store</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity style = {{flexDirection: 'row'}}>
@@ -84,7 +84,7 @@ export default function Product() {
 
                 <Text style = {styles.description}>Description</Text>
 
-                <Text style = {styles.descText}>Let it go, let it go Can't hold it back anymore Let it go, let it go Turn away and slam the door I don't care what they're going to say Let the storm rage on The cold never bothered me anyway
+                <Text style = {styles.descText}> your money my money
                 </Text>
 
                 <View style = {styles.rateContainer}>

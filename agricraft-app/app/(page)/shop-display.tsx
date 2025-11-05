@@ -32,7 +32,7 @@ export default function shopDisplay(){
                 <View style={styles.line}/>
 
                 <View style={shopStyle.shopBanner}>
-                    <Image source={require('../../assets/images/coco.jpg')}
+                    <Image source={require('../../assets/images/apple.png')}
                            style={shopStyle.shopProfile}/>
                     <Text style={shopStyle.shopName}>Store Name</Text>
                 </View>
@@ -43,7 +43,7 @@ export default function shopDisplay(){
                 <View style={shopStyle.container}>
 
                     <TouchableOpacity style={shopStyle.card}>
-                        <Image source={require('../../assets/images/coco.jpg')} style={shopStyle.cardImage}/>
+                        <Image source={require('../../assets/images/apple.png')} style={shopStyle.cardImage}/>
                         <Text style={shopStyle.cardText}>Apple</Text>
                         <Text style={shopStyle.cardPrice}>₱16.78</Text>
 
@@ -60,7 +60,7 @@ export default function shopDisplay(){
                     </TouchableOpacity>
 
                     <TouchableOpacity style={shopStyle.card} onPress={() => router.push("/(page)/writeReview")}>
-                        <Image source={require('../../assets/images/coco.jpg')} style={shopStyle.cardImage}/>
+                        <Image source={require('../../assets/images/apple.png')} style={shopStyle.cardImage}/>
                         <Text style={shopStyle.cardText}>Apple</Text>
                         <Text style={shopStyle.cardPrice}>₱16.78</Text>
 
@@ -77,7 +77,7 @@ export default function shopDisplay(){
                     </TouchableOpacity>
 
                     <View style={shopStyle.card}>
-                        <Image source={require('../../assets/images/coco.jpg')} style={shopStyle.cardImage}/>
+                        <Image source={require('../../assets/images/apple.png')} style={shopStyle.cardImage}/>
                         <Text style={shopStyle.cardText}>Apple</Text>
                         <Text style={shopStyle.cardPrice}>₱16.78</Text>
 
@@ -94,7 +94,7 @@ export default function shopDisplay(){
                     </View>
 
                     <View style={shopStyle.card}>
-                        <Image source={require('../../assets/images/coco.jpg')} style={shopStyle.cardImage}/>
+                        <Image source={require('../../assets/images/apple.png')} style={shopStyle.cardImage}/>
                         <Text style={shopStyle.cardText}>Apple</Text>
                         <Text style={shopStyle.cardPrice}>₱16.78</Text>
 
@@ -111,7 +111,7 @@ export default function shopDisplay(){
                     </View>
 
                     <View style={shopStyle.card}>
-                        <Image source={require('../../assets/images/coco.jpg')} style={shopStyle.cardImage}/>
+                        <Image source={require('../../assets/images/apple.png')} style={shopStyle.cardImage}/>
                         <Text style={shopStyle.cardText}>Apple</Text>
                         <Text style={shopStyle.cardPrice}>₱16.78</Text>
 
@@ -128,7 +128,7 @@ export default function shopDisplay(){
                     </View>
 
                     <View style={shopStyle.card}>
-                        <Image source={require('../../assets/images/coco.jpg')} style={shopStyle.cardImage}/>
+                        <Image source={require('../../assets/images/apple.png')} style={shopStyle.cardImage}/>
                         <Text style={shopStyle.cardText}>Apple</Text>
                         <Text style={shopStyle.cardPrice}>₱16.78</Text>
 

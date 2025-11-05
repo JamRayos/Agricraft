@@ -102,7 +102,7 @@ export default function Index() {
                 <Text style={editProfStyles.myProfileText}>My Profile</Text>
                 <View style={editProfStyles.pfpContainer}>
                     <Image
-                        source={require('../../assets/images/frozen.png')}
+                        source={require('../../assets/images/nailong.png')}
                         style={editProfStyles.userImage}
                     />
                     <Image

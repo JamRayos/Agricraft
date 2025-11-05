@@ -20,10 +20,10 @@ export default function Profile() {
                     <View style={indexStyles.beigeProfCard}>
                         <View style={indexStyles.profContainer}>
                             <Image
-                                source={require('../../assets/images/profileUserImage.png')}
+                                source={require('../../assets/images/nailong.png')}
                                 style={indexStyles.userImage}
                             />
-                            <Text style={indexStyles.beigeCardText}>Ser, Tapos napo</Text>
+                            <Text style={indexStyles.beigeCardText}>Sheila</Text>
                         </View>
                     </View>
                 </View>

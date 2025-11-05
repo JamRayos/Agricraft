@@ -58,12 +58,12 @@ export default function cart() {
                                         }}
                                     />
 
-                                    <Image source={require('../../assets/images/coco.jpg')} style={cartStyle.cartImage} />
+                                    <Image source={require('../../assets/images/apple.png')} style={cartStyle.cartImage} />
                                     <View style={cartStyle.cartInfoContainer}>
                                         <Text style={{
                                             fontSize: 18,
                                             marginBottom: 5,
-                                        }}>Coco Martin</Text>
+                                        }}>Apple</Text>
 
                                         <Dropdown
                                             style={cartStyle.dropdown}
@@ -123,12 +123,12 @@ export default function cart() {
                                         }}
                                     />
 
-                                    <Image source={require('../../assets/images/coco.jpg')} style={cartStyle.cartImage} />
+                                    <Image source={require('../../assets/images/apple.png')} style={cartStyle.cartImage} />
                                     <View style={cartStyle.cartInfoContainer}>
                                         <Text style={{
                                             fontSize: 18,
                                             marginBottom: 5,
-                                        }}>Coco Martin</Text>
+                                        }}>Apple</Text>
 
                                         <Dropdown
                                             style={cartStyle.dropdown}
@@ -188,12 +188,12 @@ export default function cart() {
                                         }}
                                     />
 
-                                    <Image source={require('../../assets/images/coco.jpg')} style={cartStyle.cartImage} />
+                                    <Image source={require('../../assets/images/apple.png')} style={cartStyle.cartImage} />
                                     <View style={cartStyle.cartInfoContainer}>
                                         <Text style={{
                                             fontSize: 18,
                                             marginBottom: 5,
-                                        }}>Coco Martin</Text>
+                                        }}>Apple</Text>
 
                                         <Dropdown
                                             style={cartStyle.dropdown}
@@ -253,12 +253,12 @@ export default function cart() {
                                         }}
                                     />
 
-                                    <Image source={require('../../assets/images/coco.jpg')} style={cartStyle.cartImage} />
+                                    <Image source={require('../../assets/images/apple.png')} style={cartStyle.cartImage} />
                                     <View style={cartStyle.cartInfoContainer}>
                                         <Text style={{
                                             fontSize: 18,
                                             marginBottom: 5,
-                                        }}>Coco Martin</Text>
+                                        }}>Apple</Text>
 
                                         <Dropdown
                                             style={cartStyle.dropdown}

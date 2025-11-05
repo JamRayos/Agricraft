@@ -25,12 +25,12 @@ export default function Categories() {
                 <View style={styles.line}/>
 
                 <TouchableOpacity style = {styles.productContainer} onPress={() => router.push('/(page)/writeReview')}>
-                    <Image source={require('../../assets/images/posa.jpg')}
+                    <Image source={require('../../assets/images/apple.png')}
                            style = {styles.prodImg}/>
 
                     <View style = {styles.prodDet}>
-                        <Text style = {styles.prodName}>Posang Naka Pakyu</Text>
-                        <Text style = {styles.prodPrice}>₱6969.69</Text>
+                        <Text style = {styles.prodName}>Apple</Text>
+                        <Text style = {styles.prodPrice}>₱12.45</Text>
 
                         <View style = {{flexDirection: 'row',}}>
                             <FontAwesome
@@ -57,12 +57,12 @@ export default function Categories() {
                 </TouchableOpacity>
 
                 <TouchableOpacity style = {styles.productContainer}  onPress={() => router.push('/writeReview')}>
-                    <Image source={require('../../assets/images/posa.jpg')}
+                    <Image source={require('../../assets/images/apple.png')}
                            style = {styles.prodImg}/>
 
                     <View style = {styles.prodDet}>
-                        <Text style = {styles.prodName}>Posang Naka Pakyu</Text>
-                        <Text style = {styles.prodPrice}>₱6969.69</Text>
+                        <Text style = {styles.prodName}>Apple</Text>
+                        <Text style = {styles.prodPrice}>₱12.45</Text>
 
                         <View style = {{flexDirection: 'row',}}>
                             <FontAwesome
@@ -89,12 +89,12 @@ export default function Categories() {
                 </TouchableOpacity>
 
                 <TouchableOpacity style = {styles.productContainer}>
-                    <Image source={require('../../assets/images/posa.jpg')}
+                    <Image source={require('../../assets/images/apple.png')}
                            style = {styles.prodImg}/>
 
                     <View style = {styles.prodDet}>
-                        <Text style = {styles.prodName}>Posang Naka Pakyu</Text>
-                        <Text style = {styles.prodPrice}>₱6969.69</Text>
+                        <Text style = {styles.prodName}>Apple</Text>
+                        <Text style = {styles.prodPrice}>₱12.45</Text>
 
                         <View style = {{flexDirection: 'row',}}>
                             <FontAwesome
@@ -121,12 +121,12 @@ export default function Categories() {
                 </TouchableOpacity>
 
                 <TouchableOpacity style = {styles.productContainer}>
-                    <Image source={require('../../assets/images/posa.jpg')}
+                    <Image source={require('../../assets/images/apple.png')}
                            style = {styles.prodImg}/>
 
                     <View style = {styles.prodDet}>
-                        <Text style = {styles.prodName}>Posang Naka Pakyu</Text>
-                        <Text style = {styles.prodPrice}>₱6969.69</Text>
+                        <Text style = {styles.prodName}>Apple</Text>
+                        <Text style = {styles.prodPrice}>₱12.45</Text>
 
                         <View style = {{flexDirection: 'row',}}>
                             <FontAwesome
@@ -153,12 +153,12 @@ export default function Categories() {
                 </TouchableOpacity>
 
                 <TouchableOpacity style = {styles.productContainer}>
-                    <Image source={require('../../assets/images/posa.jpg')}
+                    <Image source={require('../../assets/images/apple.png')}
                            style = {styles.prodImg}/>
 
                     <View style = {styles.prodDet}>
-                        <Text style = {styles.prodName}>Posang Naka Pakyu</Text>
-                        <Text style = {styles.prodPrice}>₱6969.69</Text>
+                        <Text style = {styles.prodName}>Apple</Text>
+                        <Text style = {styles.prodPrice}>₱12.45</Text>
 
                         <View style = {{flexDirection: 'row',}}>
                             <FontAwesome
@@ -185,12 +185,12 @@ export default function Categories() {
                 </TouchableOpacity>
 
                 <TouchableOpacity style = {styles.productContainer}>
-                    <Image source={require('../../assets/images/posa.jpg')}
+                    <Image source={require('../../assets/images/apple.png')}
                            style = {styles.prodImg}/>
 
                     <View style = {styles.prodDet}>
-                        <Text style = {styles.prodName}>Posang Naka Pakyu</Text>
-                        <Text style = {styles.prodPrice}>₱6969.69</Text>
+                        <Text style = {styles.prodName}>Apple</Text>
+                        <Text style = {styles.prodPrice}>₱12.45</Text>
 
                         <View style = {{flexDirection: 'row',}}>
                             <FontAwesome

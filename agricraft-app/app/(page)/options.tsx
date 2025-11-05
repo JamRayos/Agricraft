@@ -25,11 +25,11 @@ export default function Categories() {
                 <View style={styles.line}/>
 
                 <TouchableOpacity style = {styles.productContainer}>
-                    <Image source={require('../../assets/images/posa.jpg')}
+                    <Image source={require('../../assets/images/apple.png')}
                            style = {styles.prodImg}/>
 
                     <View style = {styles.prodDet}>
-                        <Text style = {styles.prodName}>Posang Naka Pakyu</Text>
+                        <Text style = {styles.prodName}>Apple</Text>
                         <Text style = {styles.prodPrice}>₱6969.69</Text>
 
                         <View style = {{flexDirection: 'row',}}>
@@ -49,11 +49,11 @@ export default function Categories() {
                 </TouchableOpacity>
 
                 <TouchableOpacity style = {styles.productContainer}>
-                    <Image source={require('../../assets/images/posa.jpg')}
+                    <Image source={require('../../assets/images/apple.png')}
                            style = {styles.prodImg}/>
 
                     <View style = {styles.prodDet}>
-                        <Text style = {styles.prodName}>Posang Naka Pakyu</Text>
+                        <Text style = {styles.prodName}>Apple</Text>
                         <Text style = {styles.prodPrice}>₱6969.69</Text>
 
                         <View style = {{flexDirection: 'row',}}>
@@ -73,11 +73,11 @@ export default function Categories() {
                 </TouchableOpacity>
 
                 <TouchableOpacity style = {styles.productContainer}>
-                    <Image source={require('../../assets/images/posa.jpg')}
+                    <Image source={require('../../assets/images/apple.png')}
                            style = {styles.prodImg}/>
 
                     <View style = {styles.prodDet}>
-                        <Text style = {styles.prodName}>Posang Naka Pakyu</Text>
+                        <Text style = {styles.prodName}>Apple</Text>
                         <Text style = {styles.prodPrice}>₱6969.69</Text>
 
                         <View style = {{flexDirection: 'row',}}>
@@ -97,11 +97,11 @@ export default function Categories() {
                 </TouchableOpacity>
 
                 <TouchableOpacity style = {styles.productContainer}>
-                    <Image source={require('../../assets/images/posa.jpg')}
+                    <Image source={require('../../assets/images/apple.png')}
                            style = {styles.prodImg}/>
 
                     <View style = {styles.prodDet}>
-                        <Text style = {styles.prodName}>Posang Naka Pakyu</Text>
+                        <Text style = {styles.prodName}>Apple</Text>
                         <Text style = {styles.prodPrice}>₱6969.69</Text>
 
                         <View style = {{flexDirection: 'row',}}>
@@ -121,11 +121,11 @@ export default function Categories() {
                 </TouchableOpacity>
 
                 <TouchableOpacity style = {styles.productContainer}>
-                    <Image source={require('../../assets/images/posa.jpg')}
+                    <Image source={require('../../assets/images/apple.png')}
                            style = {styles.prodImg}/>
 
                     <View style = {styles.prodDet}>
-                        <Text style = {styles.prodName}>Posang Naka Pakyu</Text>
+                        <Text style = {styles.prodName}>Apple</Text>
                         <Text style = {styles.prodPrice}>₱6969.69</Text>
 
                         <View style = {{flexDirection: 'row',}}>
@@ -145,11 +145,11 @@ export default function Categories() {
                 </TouchableOpacity>
 
                 <TouchableOpacity style = {styles.productContainer}>
-                    <Image source={require('../../assets/images/posa.jpg')}
+                    <Image source={require('../../assets/images/apple.png')}
                            style = {styles.prodImg}/>
 
                     <View style = {styles.prodDet}>
-                        <Text style = {styles.prodName}>Posang Naka Pakyu</Text>
+                        <Text style = {styles.prodName}>Apple</Text>
                         <Text style = {styles.prodPrice}>₱6969.69</Text>
 
                         <View style = {{flexDirection: 'row',}}>

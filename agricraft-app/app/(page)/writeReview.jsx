@@ -64,7 +64,7 @@ export default function writeReview() {
                         <View style={orderTrackingStyles.orderCardInner}>
 
                             <View style={orderTrackingStyles.orderImgContainer}>
-                                <Image source={require('../../assets/images/cat.jpg')} style={orderTrackingStyles.orderImg}/>
+                                <Image source={require('../../assets/images/apple.png')} style={orderTrackingStyles.orderImg}/>
                             </View>
 
                             <View style={orderTrackingStyles.orderInfoContainer}>
