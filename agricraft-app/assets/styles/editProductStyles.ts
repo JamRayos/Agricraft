@@ -16,6 +16,12 @@ export const styles = StyleSheet.create({
         marginTop: 20,
     },
 
+    productImagePreview: {
+        width: "100%",
+        height: 200,
+        borderRadius: 10,
+    },
+
     line: {
         borderBottomColor: "#ccc",
         borderBottomWidth: 2,

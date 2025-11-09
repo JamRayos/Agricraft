@@ -22,6 +22,7 @@ export const styles = StyleSheet.create({
         marginTop: 17,
     },
 
+
     arrow: {
         width: 35,
         height: 35,
