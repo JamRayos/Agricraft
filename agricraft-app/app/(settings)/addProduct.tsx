@@ -105,7 +105,7 @@ export default function AddProduct() {
                     )}
                 </TouchableOpacity>
 
-                {/* Product Name */}
+
                 <View style={[styles.inputRow, styles.shadow]}>
                     <Text style={styles.label}>Product Name</Text>
                     <TextInput
@@ -227,7 +227,6 @@ export default function AddProduct() {
                 </View>
             </Modal>
 
-            {/* Subcategory Modal */}
             <Modal visible={showSubModal} transparent animationType="fade">
                 <View style={styles.modalOverlay}>
                     <View style={styles.modalBox}>

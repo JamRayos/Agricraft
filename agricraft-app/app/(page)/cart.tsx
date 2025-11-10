@@ -1,310 +1,157 @@
-import {View, Text, Image, ScrollView, TouchableOpacity} from "react-native";
+import { View, Text, Image, ScrollView, TouchableOpacity, Alert } from "react-native";
 import { inputStyles } from "@/assets/styles/inputStyles";
-import { shop } from "@/assets/styles/shop";
 import { cartStyles } from "@/assets/styles/cartStyles";
-import { useRouter} from "expo-router";
+import { shop } from "@/assets/styles/shop";
+import { useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
+import { getFirestore, collection, query, where, getDocs, doc, updateDoc } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
+import { app } from "../../firebaseConfig";
 import Checkbox from "expo-checkbox";
-import React, { useState } from "react";
-import { Dropdown } from "react-native-element-dropdown";
 
-export default function cart() {
+type CartItem = {
+    id: string;
+    productName: string;
+    price: number;
+    amount: number;
+    image?: string;
+    shopName: string;
+    status?: string;
+};
 
+export default function Cart() {
     const styles = inputStyles();
-    const shopStyle = shop();
     const cartStyle = cartStyles();
+    const shopStyle = shop();
     const router = useRouter();
-    const [isChecked, setChecked] = useState(false);
-    const [value, setValue] = useState(null);
 
-    const data = [
-        { label: "Spicy 🍎", value: "Spicy" },
-        { label: "Hot 🍌", value: "Hot" },
-        { label: "Sezy 🍒", value: "Sezy" },
-    ];
+    const [cartItems, setCartItems] = useState<CartItem[]>([]);
+    const [selectedItems, setSelectedItems] = useState<string[]>([]); // track selected item IDs
+    const [storeTotal, setStoreTotal] = useState(0);
+
+    const fetchCart = async () => {
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const user = auth.currentUser;
+        if (!user) return;
+
+        // Only fetch cart items where status is "To Place"
+        const q = query(
+            collection(db, "cart"),
+            where("userId", "==", user.uid),
+            where("status", "==", "To Place")
+        );
+        const snapshot = await getDocs(q);
+        const items: CartItem[] = [];
+
+        snapshot.forEach((docSnap) => {
+            const data = docSnap.data();
+            items.push({
+                id: docSnap.id,
+                productName: data.productName,
+                price: Number(data.price) || 0,
+                amount: Number(data.amount) || 1,
+                image: data.image,
+                shopName: data.shopName,
+                status: data.status || "To Place",
+            });
+        });
+
+        setCartItems(items);
+    };
+
+    useEffect(() => {
+        fetchCart();
+    }, []);
+
+    // Calculate total for selected items
+    useEffect(() => {
+        const total = cartItems
+            .filter((item) => selectedItems.includes(item.id))
+            .reduce((sum, item) => sum + item.price * item.amount, 0);
+        setStoreTotal(total);
+    }, [selectedItems, cartItems]);
+
+    const handleCheckout = async () => {
+        if (selectedItems.length === 0) {
+            Alert.alert("Select Items", "Please select at least one item to checkout");
+            return;
+        }
+
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const user = auth.currentUser;
+        if (!user) return;
+
+        try {
+            // Unselect all cart items first
+            const allCartQuery = query(collection(db, "cart"), where("userId", "==", user.uid));
+            const allCartSnap = await getDocs(allCartQuery);
+
+            for (const docSnap of allCartSnap.docs) {
+                await updateDoc(docSnap.ref, { selected: false });
+            }
+
+            // Mark selected items as selected
+            for (const id of selectedItems) {
+                const docRef = doc(db, "cart", id);
+                await updateDoc(docRef, { selected: true });
+            }
+
+            router.push("/(page)/checkout");
+        } catch (error) {
+            console.error("Error marking selected items:", error);
+            Alert.alert("Error", "Failed to proceed to checkout");
+        }
+    };
 
     return (
         <View style={styles.container}>
-            <ScrollView style={shopStyle.scrollContainer} contentContainerStyle={{paddingBottom: 100}}>
-                <View style={styles.container}>
-                    <View style={{flexDirection: "row", justifyContent: "space-between",}}>
-                        <TouchableOpacity onPress={() => router.back()}>
-                            <Image source={require('../../assets/images/back.png')}
-                                   style={{width: 29, height: 29, marginLeft: 20, marginTop: 1,}}/>
-                        </TouchableOpacity>
-                    </View>
-
-                    <View style={styles.line}/>
-
-                    <View style={{alignItems: "center", justifyContent: "center", marginBottom: 10}}>
+            <ScrollView style={shopStyle.scrollContainer} contentContainerStyle={{ paddingBottom: 100 }}>
+                {cartItems.map((item) => (
+                    <View key={item.id} style={{ alignItems: "center", marginBottom: 10 }}>
                         <View style={cartStyle.card}>
-                            <View>
-                                <View style={{flexDirection: "row", marginTop: 10,}}>
-                                    <Checkbox
-                                        value={isChecked}
-                                        onValueChange={setChecked}
-                                        color={isChecked ? "green" : undefined}
-                                        style={cartStyle.checkbox}
-                                    />
-                                    <Text style={cartStyle.headerText}>Store Name</Text>
-                                </View>
-                                <View style={cartStyle.cardContainer}>
-                                    <Checkbox
-                                        value={isChecked}
-                                        onValueChange={setChecked}
-                                        color={isChecked ? "green" : undefined}
-                                        style={{
-                                            borderRadius: 5,
-                                            marginLeft: 5,
-                                        }}
-                                    />
+                            {/* Store Header */}
+                            <View style={{ flexDirection: "row", alignItems: "center", marginTop: 10 }}>
+                                <Checkbox
+                                    value={selectedItems.includes(item.id)}
+                                    onValueChange={() => {
+                                        if (selectedItems.includes(item.id)) {
+                                            setSelectedItems(selectedItems.filter((i) => i !== item.id));
+                                        } else {
+                                            setSelectedItems([...selectedItems, item.id]);
+                                        }
+                                    }}
+                                    color={selectedItems.includes(item.id) ? "green" : undefined}
+                                    style={cartStyle.checkbox}
+                                />
+                                <Text style={cartStyle.headerText}>{item.shopName}</Text>
+                            </View>
 
-                                    <Image source={require('../../assets/images/apple.png')} style={cartStyle.cartImage} />
-                                    <View style={cartStyle.cartInfoContainer}>
-                                        <Text style={{
-                                            fontSize: 18,
-                                            marginBottom: 5,
-                                        }}>Apple</Text>
 
-                                        <Dropdown
-                                            style={cartStyle.dropdown}
-                                            data={data}
-                                            labelField="label"
-                                            valueField="value"
-                                            placeholder="  Select"
-                                            value={value}
-                                            onChange={(item) => setValue(item.value)}
-                                        />
-
-                                        <Text style={{
-                                            fontSize: 18,
-                                            marginBottom: 5,
-                                        }}>₱16.78</Text>
-
-                                        <View style={cartStyle.quantityContainer}>
-
-                                            <TouchableOpacity style={cartStyle.quantityButtons}>
-                                                <Text style={cartStyle.quantityButtonText}>-</Text>
-                                            </TouchableOpacity>
-
-                                            <Text style={{
-                                                fontWeight: "bold",
-                                                fontSize: 18,
-                                            }}>0</Text>
-
-                                            <TouchableOpacity style={cartStyle.quantityButtons}>
-                                                <Text style={cartStyle.quantityButtonText}>+</Text>
-                                            </TouchableOpacity>
-                                        </View>
-                                    </View>
+                            <View style={cartStyle.cardContainer}>
+                                <Image
+                                    source={item.image ? { uri: item.image } : require("../../assets/images/apple.png")}
+                                    style={cartStyle.cartImage}
+                                />
+                                <View style={cartStyle.cartInfoContainer}>
+                                    <Text style={{ fontSize: 18, fontWeight: "bold" }}>{item.productName}</Text>
+                                    <Text style={{ fontSize: 18, marginTop: 5 }}>₱{(item.price * item.amount).toFixed(2)}</Text>
+                                    <Text style={{ fontSize: 16 }}>Quantity: {item.amount}</Text>
+                                    <Text style={{ fontSize: 16 }}>Status: {item.status}</Text>
                                 </View>
                             </View>
                         </View>
                     </View>
-                    <View style={{alignItems: "center", justifyContent: "center", marginBottom: 10}}>
-                        <View style={cartStyle.card}>
-                            <View>
-                                <View style={{flexDirection: "row", marginTop: 10,}}>
-                                    <Checkbox
-                                        value={isChecked}
-                                        onValueChange={setChecked}
-                                        color={isChecked ? "green" : undefined}
-                                        style={cartStyle.checkbox}
-                                    />
-                                    <Text style={cartStyle.headerText}>Store Name</Text>
-                                </View>
-                                <View style={cartStyle.cardContainer}>
-                                    <Checkbox
-                                        value={isChecked}
-                                        onValueChange={setChecked}
-                                        color={isChecked ? "green" : undefined}
-                                        style={{
-                                            borderRadius: 5,
-                                            marginLeft: 5,
-                                        }}
-                                    />
-
-                                    <Image source={require('../../assets/images/apple.png')} style={cartStyle.cartImage} />
-                                    <View style={cartStyle.cartInfoContainer}>
-                                        <Text style={{
-                                            fontSize: 18,
-                                            marginBottom: 5,
-                                        }}>Apple</Text>
-
-                                        <Dropdown
-                                            style={cartStyle.dropdown}
-                                            data={data}
-                                            labelField="label"
-                                            valueField="value"
-                                            placeholder="  Select"
-                                            value={value}
-                                            onChange={(item) => setValue(item.value)}
-                                        />
-
-                                        <Text style={{
-                                            fontSize: 18,
-                                            marginBottom: 5,
-                                        }}>₱16.78</Text>
-
-                                        <View style={cartStyle.quantityContainer}>
-
-                                            <TouchableOpacity style={cartStyle.quantityButtons}>
-                                                <Text style={cartStyle.quantityButtonText}>-</Text>
-                                            </TouchableOpacity>
-
-                                            <Text style={{
-                                                fontWeight: "bold",
-                                                fontSize: 18,
-                                            }}>0</Text>
-
-                                            <TouchableOpacity style={cartStyle.quantityButtons}>
-                                                <Text style={cartStyle.quantityButtonText}>+</Text>
-                                            </TouchableOpacity>
-                                        </View>
-                                    </View>
-                                </View>
-                            </View>
-                        </View>
-                    </View>
-                    <View style={{alignItems: "center", justifyContent: "center", marginBottom: 10}}>
-                        <View style={cartStyle.card}>
-                            <View>
-                                <View style={{flexDirection: "row", marginTop: 10,}}>
-                                    <Checkbox
-                                        value={isChecked}
-                                        onValueChange={setChecked}
-                                        color={isChecked ? "green" : undefined}
-                                        style={cartStyle.checkbox}
-                                    />
-                                    <Text style={cartStyle.headerText}>Store Name</Text>
-                                </View>
-                                <View style={cartStyle.cardContainer}>
-                                    <Checkbox
-                                        value={isChecked}
-                                        onValueChange={setChecked}
-                                        color={isChecked ? "green" : undefined}
-                                        style={{
-                                            borderRadius: 5,
-                                            marginLeft: 5,
-                                        }}
-                                    />
-
-                                    <Image source={require('../../assets/images/apple.png')} style={cartStyle.cartImage} />
-                                    <View style={cartStyle.cartInfoContainer}>
-                                        <Text style={{
-                                            fontSize: 18,
-                                            marginBottom: 5,
-                                        }}>Apple</Text>
-
-                                        <Dropdown
-                                            style={cartStyle.dropdown}
-                                            data={data}
-                                            labelField="label"
-                                            valueField="value"
-                                            placeholder="  Select"
-                                            value={value}
-                                            onChange={(item) => setValue(item.value)}
-                                        />
-
-                                        <Text style={{
-                                            fontSize: 18,
-                                            marginBottom: 5,
-                                        }}>₱16.78</Text>
-
-                                        <View style={cartStyle.quantityContainer}>
-
-                                            <TouchableOpacity style={cartStyle.quantityButtons}>
-                                                <Text style={cartStyle.quantityButtonText}>-</Text>
-                                            </TouchableOpacity>
-
-                                            <Text style={{
-                                                fontWeight: "bold",
-                                                fontSize: 18,
-                                            }}>0</Text>
-
-                                            <TouchableOpacity style={cartStyle.quantityButtons}>
-                                                <Text style={cartStyle.quantityButtonText}>+</Text>
-                                            </TouchableOpacity>
-                                        </View>
-                                    </View>
-                                </View>
-                            </View>
-                        </View>
-                    </View>
-                    <View style={{alignItems: "center", justifyContent: "center", marginBottom: 10}}>
-                        <View style={cartStyle.card}>
-                            <View>
-                                <View style={{flexDirection: "row", marginTop: 10,}}>
-                                    <Checkbox
-                                        value={isChecked}
-                                        onValueChange={setChecked}
-                                        color={isChecked ? "green" : undefined}
-                                        style={cartStyle.checkbox}
-                                    />
-                                    <Text style={cartStyle.headerText}>Store Name</Text>
-                                </View>
-                                <View style={cartStyle.cardContainer}>
-                                    <Checkbox
-                                        value={isChecked}
-                                        onValueChange={setChecked}
-                                        color={isChecked ? "green" : undefined}
-                                        style={{
-                                            borderRadius: 5,
-                                            marginLeft: 5,
-                                        }}
-                                    />
-
-                                    <Image source={require('../../assets/images/apple.png')} style={cartStyle.cartImage} />
-                                    <View style={cartStyle.cartInfoContainer}>
-                                        <Text style={{
-                                            fontSize: 18,
-                                            marginBottom: 5,
-                                        }}>Apple</Text>
-
-                                        <Dropdown
-                                            style={cartStyle.dropdown}
-                                            data={data}
-                                            labelField="label"
-                                            valueField="value"
-                                            placeholder="  Select"
-                                            value={value}
-                                            onChange={(item) => setValue(item.value)}
-                                        />
-
-                                        <Text style={{
-                                            fontSize: 18,
-                                            marginBottom: 5,
-                                        }}>₱16.78</Text>
-
-                                        <View style={cartStyle.quantityContainer}>
-
-                                            <TouchableOpacity style={cartStyle.quantityButtons}>
-                                                <Text style={cartStyle.quantityButtonText}>-</Text>
-                                            </TouchableOpacity>
-
-                                            <Text style={{
-                                                fontWeight: "bold",
-                                                fontSize: 18,
-                                            }}>0</Text>
-
-                                            <TouchableOpacity style={cartStyle.quantityButtons}>
-                                                <Text style={cartStyle.quantityButtonText}>+</Text>
-                                            </TouchableOpacity>
-                                        </View>
-                                    </View>
-                                </View>
-                            </View>
-                        </View>
-                    </View>
-
-                </View>
+                ))}
             </ScrollView>
 
             <View style={cartStyle.bottomTab}>
-                <Text style={{marginRight: 15, fontSize: 16,fontWeight: "bold"}}>₱0</Text>
-                <TouchableOpacity style={cartStyle.checkOutButton} onPress={() => router.push("/(page)/checkout")}>
+                <Text style={{ marginRight: 15, fontSize: 16, fontWeight: "bold" }}>₱{storeTotal.toFixed(2)}</Text>
+                <TouchableOpacity style={cartStyle.checkOutButton} onPress={handleCheckout}>
                     <Text>Checkout</Text>
                 </TouchableOpacity>
             </View>
         </View>
-    )
+    );
 }

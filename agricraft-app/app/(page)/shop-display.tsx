@@ -1,151 +1,162 @@
-import {View, Text, Image, ScrollView, TouchableOpacity} from "react-native";
-import { inputStyles } from "@/assets/styles/inputStyles";
-import { shop } from "@/assets/styles/shop";
-import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter} from "expo-router";
+import React, { useEffect, useState } from "react";
+import { ActivityIndicator, FlatList, Image, Text, TouchableOpacity, View } from "react-native";
+import { useLocalSearchParams, router } from "expo-router";
+import { collection, getDocs, getFirestore, doc, getDoc } from "firebase/firestore";
+import { app } from "../../firebaseConfig";
 
-export default function shopDisplay(){
+type Product = {
+    id: string;
+    productName: string;
+    price: number;
+    amount: number;
+    photo?: string;
+    description?: string;
+    sold?: number;
+};
 
-    const styles = inputStyles();
-    const router = useRouter();
-    const shopStyle = shop();
+export default function ShopProducts() {
+    const { shopId } = useLocalSearchParams<{ shopId?: string }>();
+    const [loading, setLoading] = useState(true);
+    const [products, setProducts] = useState<Product[]>([]);
+    const [shopName, setShopName] = useState("Loading...");
+
+    useEffect(() => {
+        let mounted = true;
+
+        const fetchProducts = async () => {
+            if (!shopId) {
+                setLoading(false);
+                return;
+            }
+
+            const db = getFirestore(app);
+            setLoading(true);
+
+            try {
+
+                const shopRef = doc(db, "shops", shopId);
+                const shopSnap = await getDoc(shopRef);
+                if (shopSnap.exists()) {
+                    const shopData = shopSnap.data();
+                    setShopName(shopData.shopName ?? shopData.name ?? "Shop");
+                } else {
+                    setShopName("Unknown Shop");
+                }
+
+
+                const productsRef = collection(db, "shops", shopId, "products");
+                const productsSnap = await getDocs(productsRef);
+
+                const items: Product[] = [];
+
+                for (const docSnap of productsSnap.docs) {
+                    const data = docSnap.data() as Omit<Product, "id" | "sold">;
+
+
+                    const ordersRef = collection(db, "orders");
+                    const ordersSnap = await getDocs(ordersRef);
+                    let soldCount = 0;
+                    ordersSnap.forEach((order) => {
+                        const orderData = order.data();
+                        if (orderData.productId === docSnap.id && ["To Ship", "Shipped"].includes(orderData.status)) {
+                            soldCount += Number(orderData.amount) || 0;
+                        }
+                    });
+
+                    items.push({
+                        id: docSnap.id,
+                        sold: soldCount,
+                        ...data,
+                    });
+                }
+
+                if (mounted) setProducts(items);
+            } catch (err) {
+                console.error("Error loading shop products:", err);
+            } finally {
+                if (mounted) setLoading(false);
+            }
+        };
+
+        fetchProducts();
+        return () => {
+            mounted = false;
+        };
+    }, [shopId]);
 
     return (
-        <ScrollView contentContainerStyle={shopStyle.scrollContainer}>
-            <View style={styles.container}>
-
-                <View style={{
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                }}>
-                    <TouchableOpacity onPress={() => router.back()}>
-                        <Image source={require('../../assets/images/back.png')}
-                               style={{width: 29, height: 29, marginLeft: 20, marginTop: 1,}}/>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity onPress={() => router.push("/(page)/cart")}>
-                        <Image source={require('../../assets/images/cart.png')}
-                               style={{width: 25, height: 25, marginRight: 30, marginTop: 4,}}/>
-                    </TouchableOpacity>
-                </View>
-
-                <View style={styles.line}/>
-
-                <View style={shopStyle.shopBanner}>
-                    <Image source={require('../../assets/images/apple.png')}
-                           style={shopStyle.shopProfile}/>
-                    <Text style={shopStyle.shopName}>Store Name</Text>
-                </View>
-
-                <Text style={shopStyle.headerText}>Products</Text>
-                <View style={styles.line}/>
-
-                <View style={shopStyle.container}>
-
-                    <TouchableOpacity style={shopStyle.card}>
-                        <Image source={require('../../assets/images/apple.png')} style={shopStyle.cardImage}/>
-                        <Text style={shopStyle.cardText}>Apple</Text>
-                        <Text style={shopStyle.cardPrice}>₱16.78</Text>
-
-                        <View style={shopStyle.cardInfo}>
-                            <View style={shopStyle.rate}>
-                                <LinearGradient
-                                    colors={['#00000040', '#00000000']}
-                                    style={shopStyle.gradientRate}
-                                />
-                                <Text style={shopStyle.ratingNum}>★ 4.9</Text>
-                            </View>
-                            <Text style={shopStyle.soldNum}>1k+ sold</Text>
-                        </View>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity style={shopStyle.card} onPress={() => router.push("/(page)/writeReview")}>
-                        <Image source={require('../../assets/images/apple.png')} style={shopStyle.cardImage}/>
-                        <Text style={shopStyle.cardText}>Apple</Text>
-                        <Text style={shopStyle.cardPrice}>₱16.78</Text>
-
-                        <View style={shopStyle.cardInfo}>
-                            <View style={shopStyle.rate}>
-                                <LinearGradient
-                                    colors={['#00000040', '#00000000']}
-                                    style={shopStyle.gradientRate}
-                                />
-                                <Text style={shopStyle.ratingNum}>★ 4.9</Text>
-                            </View>
-                            <Text style={shopStyle.soldNum}>1k+ sold</Text>
-                        </View>
-                    </TouchableOpacity>
-
-                    <View style={shopStyle.card}>
-                        <Image source={require('../../assets/images/apple.png')} style={shopStyle.cardImage}/>
-                        <Text style={shopStyle.cardText}>Apple</Text>
-                        <Text style={shopStyle.cardPrice}>₱16.78</Text>
-
-                        <View style={shopStyle.cardInfo}>
-                            <View style={shopStyle.rate}>
-                                <LinearGradient
-                                    colors={['#00000040', '#00000000']}
-                                    style={shopStyle.gradientRate}
-                                />
-                                <Text style={shopStyle.ratingNum}>★ 4.9</Text>
-                            </View>
-                            <Text style={shopStyle.soldNum}>1k+ sold</Text>
-                        </View>
-                    </View>
-
-                    <View style={shopStyle.card}>
-                        <Image source={require('../../assets/images/apple.png')} style={shopStyle.cardImage}/>
-                        <Text style={shopStyle.cardText}>Apple</Text>
-                        <Text style={shopStyle.cardPrice}>₱16.78</Text>
-
-                        <View style={shopStyle.cardInfo}>
-                            <View style={shopStyle.rate}>
-                                <LinearGradient
-                                    colors={['#00000040', '#00000000']}
-                                    style={shopStyle.gradientRate}
-                                />
-                                <Text style={shopStyle.ratingNum}>★ 4.9</Text>
-                            </View>
-                            <Text style={shopStyle.soldNum}>1k+ sold</Text>
-                        </View>
-                    </View>
-
-                    <View style={shopStyle.card}>
-                        <Image source={require('../../assets/images/apple.png')} style={shopStyle.cardImage}/>
-                        <Text style={shopStyle.cardText}>Apple</Text>
-                        <Text style={shopStyle.cardPrice}>₱16.78</Text>
-
-                        <View style={shopStyle.cardInfo}>
-                            <View style={shopStyle.rate}>
-                                <LinearGradient
-                                    colors={['#00000040', '#00000000']}
-                                    style={shopStyle.gradientRate}
-                                />
-                                <Text style={shopStyle.ratingNum}>★ 4.9</Text>
-                            </View>
-                            <Text style={shopStyle.soldNum}>1k+ sold</Text>
-                        </View>
-                    </View>
-
-                    <View style={shopStyle.card}>
-                        <Image source={require('../../assets/images/apple.png')} style={shopStyle.cardImage}/>
-                        <Text style={shopStyle.cardText}>Apple</Text>
-                        <Text style={shopStyle.cardPrice}>₱16.78</Text>
-
-                        <View style={shopStyle.cardInfo}>
-                            <View style={shopStyle.rate}>
-                                <LinearGradient
-                                    colors={['#00000040', '#00000000']}
-                                    style={shopStyle.gradientRate}
-                                />
-                                <Text style={shopStyle.ratingNum}>★ 4.9</Text>
-                            </View>
-                            <Text style={shopStyle.soldNum}>1k+ sold</Text>
-                        </View>
-                    </View>
-
-                </View>
+        <View style={{ flex: 1, backgroundColor: "#f5f9ff" }}>
+            {/* Header */}
+            <View style={{ flexDirection: "row", alignItems: "center", padding: 12, gap: 12 }}>
+                <TouchableOpacity onPress={() => router.back()}>
+                    <Text>{"<"} Back</Text>
+                </TouchableOpacity>
+                <Text style={{ fontSize: 20, fontWeight: "600" }}>{shopName}</Text>
             </View>
-        </ScrollView>
-    )
+
+            {loading ? (
+                <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+                    <ActivityIndicator size="large" />
+                </View>
+            ) : products.length === 0 ? (
+                <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+                    <Text>No products found in this shop.</Text>
+                </View>
+            ) : (
+                <FlatList
+                    data={products}
+                    numColumns={2}
+                    contentContainerStyle={{ padding: 12 }}
+                    columnWrapperStyle={{ gap: 12 }}
+                    keyExtractor={(item) => item.id}
+                    renderItem={({ item }) => (
+                        <TouchableOpacity
+                            style={{
+                                flex: 1,
+                                backgroundColor: "white",
+                                padding: 10,
+                                borderRadius: 10,
+                                marginBottom: 12,
+                            }}
+                            onPress={() =>
+                                router.push({
+                                    pathname: "/product",
+                                    params: {
+                                        id: item.id,
+                                        name: item.productName,
+                                        price: item.price.toString(),
+                                        amount: item.amount.toString(),
+                                        image: item.photo || "",
+                                        description: item.description ?? "",
+                                        shopId: shopId || "",
+                                    },
+                                })
+                            }
+                        >
+                            <View
+                                style={{
+                                    height: 100,
+                                    backgroundColor: "#eef2ff",
+                                    borderRadius: 8,
+                                    marginBottom: 8,
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                }}
+                            >
+                                {item.photo ? (
+                                    <Image source={{ uri: item.photo }} style={{ width: "100%", height: "100%", borderRadius: 8 }} />
+                                ) : (
+                                    <Text>No Image</Text>
+                                )}
+                            </View>
+                            <Text style={{ fontWeight: "600" }}>{item.productName}</Text>
+                            <Text style={{ color: "#6b7280" }}>₱{Number(item.price ?? 0).toFixed(2)}</Text>
+                            <Text style={{ color: "#6b7280", fontSize: 12 }}>Amount: {item.amount ?? 0}</Text>
+                            <Text style={{ color: "#6b7280", fontSize: 12 }}>Sold: {item.sold ?? 0}</Text>
+                        </TouchableOpacity>
+                    )}
+                />
+            )}
+        </View>
+    );
 }

@@ -1,12 +1,11 @@
 import { router } from 'expo-router';
-import {useEffect, useState} from 'react';
+import { useEffect, useState } from 'react';
 import { Alert, Image, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
+import * as ImagePicker from "expo-image-picker";
 import { editProfStyles } from '@/assets/styles/editProfileStyles';
 import { db, auth } from "../../firebaseConfig";
 import { doc, setDoc, getDoc } from "firebase/firestore";
-
-
 
 export default function Index() {
     const [username, setUsername] = useState('');
@@ -15,19 +14,17 @@ export default function Index() {
     const [gender, setGender] = useState('');
     const [phone, setPhone] = useState('');
     const [email, setEmail] = useState('');
+    const [profileImage, setProfileImage] = useState<string | null>(null); // For profile photo
     const [loading, setLoading] = useState(false);
 
     const user = auth.currentUser;
 
-
     useEffect(() => {
         const fetchProfileData = async () => {
             if (!user) return;
-
             try {
                 const docRef = doc(db, "profile", user.uid);
                 const docSnap = await getDoc(docRef);
-
                 if (docSnap.exists()) {
                     const data = docSnap.data();
                     setUsername(data.username || '');
@@ -36,23 +33,41 @@ export default function Index() {
                     setGender(data.gender || '');
                     setPhone(data.phone || '');
                     setEmail(data.email || user.email || '');
-                } else {
-                    console.log("No profile found, creating a blank one.");
+                    setProfileImage(data.profileImage || null); // load existing photo
                 }
             } catch (error) {
                 console.error("Error loading profile:", error);
             }
         };
-
         fetchProfileData();
     }, [user]);
 
+    const pickProfileImage = async () => {
+        try {
+            const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            if (!permission.granted) {
+                Alert.alert("Permission required", "We need access to your gallery.");
+                return;
+            }
+
+            const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                allowsEditing: true,
+                aspect: [1, 1],
+                quality: 1,
+            });
+
+            if (!result.canceled) {
+                setProfileImage(result.assets[0].uri);
+            }
+        } catch (error) {
+            console.error("Error picking image:", error);
+            Alert.alert("Error", "Failed to pick image");
+        }
+    };
 
     const handleSaveChanges = async () => {
-        if (!user) {
-            Alert.alert("Not signed in", "You must be logged in to update your profile.");
-            return;
-        }
+        if (!user) return;
 
         Alert.alert("Save Changes", "Are you sure you want to save changes?", [
             { text: "Cancel", style: "cancel" },
@@ -70,6 +85,7 @@ export default function Index() {
                                 gender,
                                 phone,
                                 email,
+                                profileImage, // save photo
                                 updatedAt: new Date(),
                             },
                             { merge: true }
@@ -85,6 +101,7 @@ export default function Index() {
             },
         ]);
     };
+
     return (
         <ScrollView contentContainerStyle={{ paddingBottom: 270 }}>
             <View>
@@ -98,24 +115,25 @@ export default function Index() {
 
                 <View style={editProfStyles.line} />
 
-
                 <Text style={editProfStyles.myProfileText}>My Profile</Text>
                 <View style={editProfStyles.pfpContainer}>
                     <Image
-                        source={require('../../assets/images/nailong.png')}
+                        source={profileImage ? { uri: profileImage } : require('../../assets/images/nailong.png')}
                         style={editProfStyles.userImage}
                     />
-                    <Image
-                        source={require('../../assets/images/pencilEdit.png')}
+                    <TouchableOpacity
                         style={editProfStyles.pencilEdit}
-                    />
+                        onPress={pickProfileImage} // pencil acts as button
+                    >
+                        <Image
+                            source={require('../../assets/images/pencilEdit.png')}
+                            style={{ width: '100%', height: '100%' }}
+                        />
+                    </TouchableOpacity>
                 </View>
-
 
                 <View style={editProfStyles.blueCard}>
                     <View style={editProfStyles.beigeCard}>
-
-
                         <TouchableOpacity
                             onPress={handleSaveChanges}
                             disabled={loading}
@@ -133,7 +151,6 @@ export default function Index() {
                                 </View>
                             </View>
                         </TouchableOpacity>
-
 
                         <View style={editProfStyles.container}>
                             <Text style={editProfStyles.detailLabel}>Username</Text>

@@ -111,7 +111,7 @@ export default function EditProduct() {
                     {productPhoto ? (
                         <Image
                             source={{ uri: productPhoto }}
-                            style={styles.productImagePreview} // new style for preview
+                            style={styles.productImagePreview}
                             resizeMode="cover"
                         />
                     ) : (
@@ -208,7 +208,6 @@ export default function EditProduct() {
                     />
                 </View>
 
-                {/* Price */}
                 <View style={[styles.priceContainer, styles.shadow]}>
                     <Text style={styles.label}>Price ₱</Text>
                     <TextInput

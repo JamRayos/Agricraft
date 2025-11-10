@@ -1,9 +1,9 @@
 import { useRouter } from "expo-router";
 import React, { useState, useEffect } from "react";
-import {Alert, Image, Modal, Pressable, ScrollView, Text, TextInput, TouchableOpacity, View} from "react-native";
+import { Alert, Image, Modal, Pressable, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { styles } from '@/assets/styles/myShopStyles';
 import { db, auth } from '@/firebaseConfig';
-import {collection, query, onSnapshot, doc, deleteDoc, getDoc, setDoc} from "firebase/firestore";
+import { collection, query, onSnapshot, doc, deleteDoc, getDoc, setDoc } from "firebase/firestore";
 
 export default function MyShop() {
     const router = useRouter();
@@ -16,9 +16,17 @@ export default function MyShop() {
     const [editShopName, setEditShopName] = useState(shopName);
     const [editDescription, setEditDescription] = useState(description);
     const [editPolicy, setEditPolicy] = useState(policy);
-
     const [products, setProducts] = useState<any[]>([]);
 
+    // Sales history counts
+    const [salesCounts, setSalesCounts] = useState({
+        unpaid: 0,
+        completed: 0,
+        cancelled: 0,
+        refund: 0
+    });
+
+    // Fetch shop info and products
     useEffect(() => {
         if (!userId) return;
 
@@ -35,16 +43,52 @@ export default function MyShop() {
             .catch(err => console.error("Error fetching shop info:", err));
 
         const q = query(collection(db, "shops", userId, "products"));
-        const unsubscribe = onSnapshot(q, snapshot => {
+        const unsubscribeProducts = onSnapshot(q, snapshot => {
             const items: any[] = [];
             snapshot.forEach(doc => items.push({ id: doc.id, ...doc.data() }));
             setProducts(items);
         });
 
-        return () => unsubscribe();
+        return () => unsubscribeProducts();
     }, [userId]);
 
+    useEffect(() => {
+        if (!userId) return;
 
+        const ordersRef = collection(db, "orders");
+        const unsubscribeOrders = onSnapshot(ordersRef, snapshot => {
+            const counts = { unpaid: 0, completed: 0, cancelled: 0, refund: 0 };
+
+            snapshot.forEach(docSnap => {
+                const order = docSnap.data();
+                if (order.shopId !== userId) return; // only this shop's orders
+
+                const status = (order.status || "").toLowerCase();
+                switch(status) {
+                    case "unpaid":
+                    case "to receive":
+                        counts.unpaid += 1;
+                        break;
+                    case "completed":
+                        counts.completed += 1;
+                        break;
+                    case "cancelled":
+                        counts.cancelled += 1;
+                        break;
+                    case "refund":
+                    case "return":
+                        counts.refund += 1;
+                        break;
+                }
+            });
+
+            setSalesCounts(counts);
+        });
+
+        return () => unsubscribeOrders();
+    }, [userId]);
+
+    // --- Existing functions ---
     const handleDelete = (id: string) => {
         Alert.alert(
             "Confirm Delete",
@@ -149,6 +193,7 @@ export default function MyShop() {
                     </View>
                 </View>
 
+                {/* Sales History */}
                 <View style={styles.salesContainer}>
                     <View style={styles.salesHeader}>
                         <Text style={styles.salesTitle}>Sales History</Text>
@@ -160,12 +205,22 @@ export default function MyShop() {
                         </Pressable>
                     </View>
                     <View style={styles.salesStats}>
-                        {["Unpaid", "Completed", "Canceled", "Return/Refund"].map((label) => (
-                            <View style={styles.salesBox} key={label}>
-                                <Text style={styles.salesNumber}>0</Text>
-                                <Text style={styles.salesLabel}>{label}</Text>
-                            </View>
-                        ))}
+                        <View style={styles.salesBox}>
+                            <Text style={styles.salesNumber}>{salesCounts.unpaid}</Text>
+                            <Text style={styles.salesLabel}>To Receive</Text>
+                        </View>
+                        <View style={styles.salesBox}>
+                            <Text style={styles.salesNumber}>{salesCounts.completed}</Text>
+                            <Text style={styles.salesLabel}>Completed</Text>
+                        </View>
+                        <View style={styles.salesBox}>
+                            <Text style={styles.salesNumber}>{salesCounts.cancelled}</Text>
+                            <Text style={styles.salesLabel}>Cancelled</Text>
+                        </View>
+                        <View style={styles.salesBox}>
+                            <Text style={styles.salesNumber}>{salesCounts.refund}</Text>
+                            <Text style={styles.salesLabel}>Refund</Text>
+                        </View>
                     </View>
                 </View>
 

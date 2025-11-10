@@ -80,7 +80,7 @@ export default function Login() {
                 style={[styles.input, styles.shadows]}
                 autoCapitalize="none"
                 placeholder="Email"
-                placeholderTextColor = "#9A8478"
+                placeholderTextColor="#9A8478"
                 value={email}
                 onChangeText={setEmail}
             />
@@ -89,9 +89,10 @@ export default function Login() {
                 style={[styles.input, styles.shadows]}
                 autoCapitalize="none"
                 placeholder="Password"
-                placeholderTextColor = "#9A8478"
+                placeholderTextColor="#9A8478"
                 value={password}
                 onChangeText={setPassword}
+                secureTextEntry={true} // 🔹 hides password
             />
 
             <TouchableOpacity style={[styles.button, styles.shadows]} onPress={handleLogin}>

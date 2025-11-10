@@ -1,13 +1,30 @@
 import React, { useEffect, useState } from "react";
-import { Alert, Image, ScrollView, Text, TouchableOpacity, View, ActivityIndicator } from "react-native";
-import { router } from "expo-router";
+import {
+    Alert,
+    Image,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View,
+    ActivityIndicator,
+} from "react-native";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { myAddressStyles } from "@/assets/styles/myAddressesStyles";
 import { db, auth } from "../../firebaseConfig";
-import { collection, onSnapshot, deleteDoc, doc, QueryDocumentSnapshot, DocumentData } from "firebase/firestore";
+import {
+    collection,
+    onSnapshot,
+    deleteDoc,
+    doc,
+    QueryDocumentSnapshot,
+    DocumentData,
+} from "firebase/firestore";
 
 export default function MyAddresses() {
     const [addresses, setAddresses] = useState<Array<Record<string, any>>>([]);
     const [loading, setLoading] = useState(true);
+    const router = useRouter();
+    const params = useLocalSearchParams<{ redirect?: string }>(); // check if we need to redirect back
 
     useEffect(() => {
         const user = auth.currentUser;
@@ -18,7 +35,6 @@ export default function MyAddresses() {
         }
 
         const addressRef = collection(db, "address", user.uid, "userAddresses");
-
 
         const unsubscribe = onSnapshot(
             addressRef,
@@ -40,7 +56,7 @@ export default function MyAddresses() {
         return () => unsubscribe();
     }, []);
 
-    // 🔹 Delete address
+    // Delete address
     const handleDeleteAddress = (id: string) => {
         const user = auth.currentUser;
         if (!user) return;
@@ -62,6 +78,22 @@ export default function MyAddresses() {
         ]);
     };
 
+    // Select address and go back to Checkout with local search params
+    const handleSelectAddress = (address: Record<string, any>) => {
+        if (params.redirect === "checkout") {
+            router.push({
+                pathname: "/(page)/checkout",
+                params: {
+                    fullName: address.fullName,
+                    phone: address.phone,
+                    street: address.street,
+                    cityProvince: address.cityProvince,
+                    postalCode: address.postalCode,
+                    // Optionally keep previous cart item info in params
+                },
+            });
+        }
+    };
 
     if (loading) {
         return (
@@ -74,7 +106,7 @@ export default function MyAddresses() {
     return (
         <ScrollView>
             <View>
-
+                {/* Header */}
                 <View style={{ flexDirection: "row", marginTop: 50 }}>
                     <TouchableOpacity onPress={() => router.back()}>
                         <Image source={require("../../assets/images/back.png")} style={myAddressStyles.arrow} />
@@ -84,14 +116,25 @@ export default function MyAddresses() {
 
                 <View style={myAddressStyles.line} />
 
-
                 {addresses.length > 0 ? (
                     addresses.map((item, index) => (
-                        <View key={item.id} style={myAddressStyles.yellowCard}>
+                        <TouchableOpacity
+                            style={myAddressStyles.yellowCard}
+                            key={item.id}
+                            onPress={() => {
+                                router.push({
+                                    pathname: "/(page)/checkout",
+                                    params: { selectedAddress: item.id },
+                                });
+                            }}
+                        >
                             <View style={myAddressStyles.headerContainer}>
                                 <Text style={myAddressStyles.addressLabel}>Address #{index + 1}</Text>
                                 <TouchableOpacity onPress={() => handleDeleteAddress(item.id)}>
-                                    <Image source={require("../../assets/images/deleteButt.png")} style={myAddressStyles.deleteIMG} />
+                                    <Image
+                                        source={require("../../assets/images/deleteButt.png")}
+                                        style={myAddressStyles.deleteIMG}
+                                    />
                                 </TouchableOpacity>
                             </View>
 
@@ -117,16 +160,20 @@ export default function MyAddresses() {
                                     <Text style={myAddressStyles.addressTypeText}>{item.labelAs || "Home"}</Text>
                                 </View>
                             </View>
-                        </View>
+                        </TouchableOpacity>
                     ))
                 ) : (
                     <View style={{ alignItems: "center", marginTop: 100 }}>
-                        <Text style={{ fontSize: 16, color: "#555" }}>You haven’t added any addresses yet.</Text>
+                        <Text style={{ fontSize: 16, color: "#555" }}>
+                            You haven’t added any addresses yet.
+                        </Text>
                     </View>
                 )}
 
-
-                <TouchableOpacity style={myAddressStyles.addAddressCard} onPress={() => router.push("/addAddress")}>
+                <TouchableOpacity
+                    style={myAddressStyles.addAddressCard}
+                    onPress={() => router.push("/addAddress")}
+                >
                     <View style={myAddressStyles.addAddressContainer}>
                         <Image source={require("../../assets/images/addButton.png")} style={myAddressStyles.addButtonIMG} />
                         <Text style={myAddressStyles.addAddressLabel}>Add a new Address</Text>

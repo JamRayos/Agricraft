@@ -1,15 +1,42 @@
 import { router } from 'expo-router';
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { indexStyles } from '@/assets/styles/indexStyles';
+import { useEffect, useState } from "react";
+import { auth, db } from "../../firebaseConfig";
+import { doc, getDoc } from "firebase/firestore";
 
 export default function Profile() {
+    const [profileImage, setProfileImage] = useState<string | null>(null);
+    const [username, setUsername] = useState<string>("");
+
+    const user = auth.currentUser;
+
+    useEffect(() => {
+        const fetchProfile = async () => {
+            if (!user) return;
+
+            try {
+                const docRef = doc(db, "profile", user.uid);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    setProfileImage(data.profileImage || null);
+                    setUsername(data.username || user.displayName || "");
+                }
+            } catch (error) {
+                console.error("Error fetching profile:", error);
+            }
+        };
+
+        fetchProfile();
+    }, [user]);
+
     return (
         <ScrollView>
             <View>
                 <View style={{ flexDirection: "row", marginTop: 50 }}>
                     <TouchableOpacity onPress={() => {router.back()}}>
                         <Image source={require('../../assets/images/back.png')} style={indexStyles.arrow} />
-
                     </TouchableOpacity>
                     <Text style={indexStyles.headerText}>Profile</Text>
                 </View>
@@ -20,10 +47,10 @@ export default function Profile() {
                     <View style={indexStyles.beigeProfCard}>
                         <View style={indexStyles.profContainer}>
                             <Image
-                                source={require('../../assets/images/nailong.png')}
+                                source={profileImage ? { uri: profileImage } : require('../../assets/images/nailong.png')}
                                 style={indexStyles.userImage}
                             />
-                            <Text style={indexStyles.beigeCardText}>Sheila</Text>
+                            <Text style={indexStyles.beigeCardText}>{username || "User"}</Text>
                         </View>
                     </View>
                 </View>
@@ -32,7 +59,6 @@ export default function Profile() {
 
                 <View style={indexStyles.rowsContainer}>
                     <View style={indexStyles.row1Container}>
-
                         <TouchableOpacity style={[indexStyles.editProfCard, indexStyles.profileCards]} onPress={() => router.push('/(settings)/editProfile')}>
                             <Image source={require('../../assets/images/profileIMG.png')}
                                    style={indexStyles.editProfCardLogo}/>
@@ -48,8 +74,7 @@ export default function Profile() {
                         </TouchableOpacity>
                     </View>
 
-                    <View style = {indexStyles.row2Container}>
-
+                    <View style={indexStyles.row2Container}>
                         <TouchableOpacity style={[indexStyles.setupShopCard, indexStyles.profileCards]}
                                           onPress={() => router.push('/myShop')}>
                             <Image source = {require('../../assets/images/shopIMG.png')}
@@ -65,7 +90,6 @@ export default function Profile() {
                             <Text style={indexStyles.aboutCardText}>About</Text>
                         </TouchableOpacity>
                     </View>
-
                 </View>
 
                 <TouchableOpacity onPress={() => router.push('/(auth)/login')}>
