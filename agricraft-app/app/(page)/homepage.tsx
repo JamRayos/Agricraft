@@ -8,6 +8,8 @@ import { LinearGradient } from "expo-linear-gradient";
 import { getFirestore, collection, getDocs, query, where } from "firebase/firestore";
 import { app } from "../../firebaseConfig";
 
+
+
 type Product = {
     id: string;
     productName: string;
@@ -19,7 +21,7 @@ type Product = {
     shopName: string;
     sold?: number;
     subcategory?: string;
-    rating?: string; // Average rating or "N/A"
+    rating?: string;
 };
 
 export default function Index() {
@@ -50,6 +52,7 @@ export default function Index() {
                     for (const prodDoc of productsSnap.docs) {
                         const data = prodDoc.data();
 
+                        if (data.productStatus === 'pending') continue;
                         // --- FETCH REVIEWS AND CALCULATE AVERAGE ---
                         const reviewsQuery = query(
                             collection(db, "reviews"),
@@ -80,7 +83,7 @@ export default function Index() {
                     }
                 }
 
-                // Shuffle and take first 6 products
+
                 const shuffled = allProducts.sort(() => 0.5 - Math.random());
                 setProducts(shuffled.slice(0, 6));
 
@@ -155,7 +158,7 @@ export default function Index() {
                     </View>
                 </View>
 
-                {/* Random Products */}
+
                 <Text style={homepageStyles.head}>For You</Text>
 
                 {loadingProducts ? (
@@ -205,7 +208,7 @@ export default function Index() {
 
             </ScrollView>
 
-            {/* Footer */}
+
             <View style={homepageStyles.footerContainer}>
                 <View style={homepageStyles.footer}>
                     <View>

@@ -4,12 +4,11 @@ import { inputStyles } from "../../assets/styles/inputStyles";
 import { useRouter } from "expo-router";
 import { signInWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { auth, db } from "../../firebaseConfig";
-import { doc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 
 export default function Login() {
     const styles = inputStyles();
     const router = useRouter();
-
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [unverifiedUser, setUnverifiedUser] = useState(null);
@@ -24,17 +23,36 @@ export default function Login() {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
 
-            if (!user.emailVerified) {
-                setUnverifiedUser(user);
-                Alert.alert(
-                    "Email Not Verified",
-                    "Please verify your email before logging in."
-                );
+            // Get user data
+            const userRef = doc(db, "users", user.uid);
+            const userSnap = await getDoc(userRef);
+
+            if (!userSnap.exists()) {
+                Alert.alert("Error", "User data not found.");
                 return;
             }
 
-            // Update Firestore to reflect verification
-            const userRef = doc(db, "users", user.uid);
+            const userData = userSnap.data();
+
+            // Check email verification
+            if (!user.emailVerified) {
+                setUnverifiedUser(user);
+                Alert.alert("Email Not Verified", "Please verify your email before logging in.");
+                auth.signOut();
+                return;
+            }
+
+            // Check valid ID approval
+            if (userData.validIdStatus !== "validated") {
+                Alert.alert(
+                    "Account Pending Approval",
+                    "Your valid ID is still under review. Please wait for admin approval before logging in."
+                );
+                auth.signOut();
+                return;
+            }
+
+            // Update Firestore flag
             await updateDoc(userRef, { emailVerified: true });
 
             Alert.alert("Success", "Welcome back!");
@@ -59,41 +77,21 @@ export default function Login() {
         }
     };
 
-
-
     return (
-
         <View style={styles.container}>
-            <View style={styles.line}/>
-
+            <View style={styles.line} />
             <Text style={styles.text}>AgriCraft Market</Text>
 
-            <View style={{width:'100%',height: 350}}>
+            <View style={{ width: "100%", height: 350 }}>
                 <Image
                     source={require("../../assets/images/tempLogo.png")}
-                    style={{width: "142%", height: "100%", alignSelf: 'center', justifyContent: 'flex-end'}}
+                    style={{ width: "142%", height: "100%", alignSelf: "center", justifyContent: "flex-end" }}
                     resizeMode="cover"
                 />
             </View>
 
-            <TextInput
-                style={[styles.input, styles.shadows]}
-                autoCapitalize="none"
-                placeholder="Email"
-                placeholderTextColor="#9A8478"
-                value={email}
-                onChangeText={setEmail}
-            />
-
-            <TextInput
-                style={[styles.input, styles.shadows]}
-                autoCapitalize="none"
-                placeholder="Password"
-                placeholderTextColor="#9A8478"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry={true} // 🔹 hides password
-            />
+            <TextInput style={[styles.input, styles.shadows]} placeholder="Email" placeholderTextColor="#9A8478" value={email} onChangeText={setEmail} autoCapitalize="none" />
+            <TextInput style={[styles.input, styles.shadows]} placeholder="Password" placeholderTextColor="#9A8478" value={password} onChangeText={setPassword} secureTextEntry />
 
             <TouchableOpacity style={[styles.button, styles.shadows]} onPress={handleLogin}>
                 <Text>Login</Text>
@@ -105,8 +103,7 @@ export default function Login() {
                 </TouchableOpacity>
             )}
 
-            <View style={styles.line}/>
-
+            <View style={styles.line} />
             <View style={styles.containerBottom}>
                 <Text>No Account yet?</Text>
                 <TouchableOpacity style={[styles.loginButton, styles.shadows]} onPress={() => router.push("/(auth)/sign-up")}>
@@ -114,5 +111,5 @@ export default function Login() {
                 </TouchableOpacity>
             </View>
         </View>
-    )
+    );
 }

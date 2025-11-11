@@ -16,6 +16,7 @@ type Product = {
     shopName?: string;
     description?: string;
     sold?: number;
+    productStatus?: string;
 };
 
 export default function CategoryProducts() {
@@ -37,7 +38,6 @@ export default function CategoryProducts() {
             const db = getFirestore(app);
 
             try {
-
                 const shopsSnap = await getDocs(collection(db, 'shops'));
                 const productsList: Product[] = [];
 
@@ -52,6 +52,9 @@ export default function CategoryProducts() {
 
                     for (const p of prodSnap.docs) {
                         const data = p.data() as Omit<Product, 'id' | 'sold' | 'shopId' | 'shopName'>;
+
+                        // Skip products that are pending validation
+                        if (data.productStatus === 'pending') continue;
 
                         // Fetch sold count
                         const ordersRef = collection(db, 'orders');
@@ -90,6 +93,7 @@ export default function CategoryProducts() {
 
         return () => { mounted = false; };
     }, [sub]);
+
 
     return (
         <View style={{ flex: 1, backgroundColor: '#f5f9ff' }}>

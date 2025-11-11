@@ -114,10 +114,24 @@ export default function MyShop() {
 
     const handleSaveShopInfo = async () => {
         try {
-            await setDoc(doc(db, "shops", userId!), {
+            const shopRef = doc(db, "shops", userId!);
+            const shopSnap = await getDoc(shopRef);
+
+            let newStatus = "pending"; // default for new shops
+
+            if (shopSnap.exists()) {
+                const data = shopSnap.data();
+                // Keep approved status if already approved
+                if (data.shopStatus === "approved") {
+                    newStatus = "approved";
+                }
+            }
+
+            await setDoc(shopRef, {
                 shopName: editShopName,
                 description: editDescription,
-                policy: editPolicy
+                policy: editPolicy,
+                shopStatus: newStatus,
             }, { merge: true });
 
             setShopName(editShopName);
@@ -125,12 +139,13 @@ export default function MyShop() {
             setPolicy(editPolicy);
             setIsEditing(false);
 
-            Alert.alert("Success", "Shop information has been saved!");
+            Alert.alert("Success", `Shop information has been saved! Status: ${newStatus}`);
         } catch (err) {
             console.error("Error saving shop info:", err);
             Alert.alert("Error", "Failed to save shop information.");
         }
     };
+
 
     return (
         <ScrollView>
@@ -187,8 +202,15 @@ export default function MyShop() {
 
                         <Pressable
                             style={({ pressed }) => [styles.button, styles.viewBtn, pressed && styles.pressed]}
+                            onPress={async () => {
+                                const shopRef = doc(db, "shops", userId!);
+                                const shopSnap = await getDoc(shopRef);
+                                const status = shopSnap.exists() ? shopSnap.data()?.shopStatus || "pending" : "pending";
+
+                                Alert.alert("Shop Status", `Your shop is currently: ${status.toUpperCase()}`);
+                            }}
                         >
-                            <Text style={styles.buttonText}>View Shop</Text>
+                            <Text style={styles.buttonText}>Shop Status</Text>
                         </Pressable>
                     </View>
                 </View>
@@ -231,7 +253,21 @@ export default function MyShop() {
                             <Text style={styles.productsTitle}>My Products</Text>
                             <TouchableOpacity
                                 style={styles.addButtonWrapper}
-                                onPress={() => router.push("/addProduct")}
+                                onPress={async () => {
+                                    const shopRef = doc(db, "shops", userId!);
+                                    const shopSnap = await getDoc(shopRef);
+                                    const status = shopSnap.exists() ? shopSnap.data()?.shopStatus || "pending" : "pending";
+
+                                    if (status !== "approved") {
+                                        Alert.alert(
+                                            "Cannot Add Product",
+                                            "Your shop is not yet approved. Please wait for validation."
+                                        );
+                                        return;
+                                    }
+
+                                    router.push("/addProduct");
+                                }}
                             >
                                 <Image
                                     source={{ uri: "https://cdn-icons-png.flaticon.com/512/9239/9239975.png" }}

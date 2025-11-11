@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Text, View, TextInput, TouchableOpacity, Alert, ScrollView } from "react-native";
 import { inputStyles } from "../../assets/styles/inputStyles";
@@ -9,9 +8,7 @@ import { auth, db } from "../../firebaseConfig";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { shop } from "../../assets/styles/shop";
 
-
-const page = () => {
-
+const SignUpPage = () => {
     const styles = inputStyles();
     const router = useRouter();
     const shopStyle = shop();
@@ -28,12 +25,10 @@ const page = () => {
 
     useEffect(() => {
         (async () => {
-            const {status} = await ImagePicker.requestMediaLibraryPermissionsAsync();
-            if (status === 'granted') {
-                console.log("granted");
-            }
+            const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            if (status === "granted") console.log("Media library access granted");
         })();
-    }, [])
+    }, []);
 
     const pickImage = async () => {
         try {
@@ -42,7 +37,7 @@ const page = () => {
                 allowsEditing: true,
                 aspect: [4, 3],
                 quality: 1,
-                base64: true
+                base64: true,
             });
             if (!result.canceled) {
                 setImage(result.assets[0].uri);
@@ -62,33 +57,35 @@ const page = () => {
             Alert.alert("Error", "Passwords do not match.");
             return;
         }
+
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
+
+            // Send email verification
             await sendEmailVerification(user);
 
-            let validId = "";
-            if (imageBase64) {
-                validId = `data:image/jpeg;base64,${imageBase64}`;
-            }
+            const validId = imageBase64 ? `data:image/jpeg;base64,${imageBase64}` : "";
 
+            // Save user data
             await setDoc(doc(db, "users", user.uid), {
                 firstName,
                 middleName,
                 lastName,
                 email,
                 phoneNumber: cellphone,
-                validId: validId, // <-- Save base64 string here
-                validIdStatus: validId ? "pending" : "missing",
+                validId,
+                validIdStatus: validId ? "pending" : "missing", // Pending review
                 emailVerified: false,
                 createdAt: serverTimestamp(),
             });
 
             Alert.alert(
-                "Verify Your Email",
-                "We’ve sent a verification link to your email. Please verify before logging in."
+                "Account Created",
+                "Please verify your email and wait for your valid ID to be approved before logging in."
             );
-            auth.signOut();
+
+            await auth.signOut();
             router.push("/(auth)/login");
         } catch (error) {
             console.error("Registration Error:", error);
@@ -96,90 +93,35 @@ const page = () => {
         }
     };
 
-
     return (
         <View style={styles.container}>
-            <ScrollView style={shopStyle.scrollContainer} contentContainerStyle={{paddingBottom: 50}}>
-                <View style={styles.line}/>
+            <ScrollView style={shopStyle.scrollContainer} contentContainerStyle={{ paddingBottom: 50 }}>
+                <View style={styles.line} />
                 <Text style={styles.text}>AgriCraft Market</Text>
                 <Text style={styles.subText}>Create your account</Text>
 
-                <TextInput
-                    style={styles.input}
-                    autoCapitalize="none"
-                    placeholder="FirstName"
-                    placeholderTextColor = "#9A8478"
-                    onChangeText={setFirstName}
-                />
-                <TextInput
-                    style={styles.input}
-                    placeholder={"MiddleName"}
-                    placeholderTextColor = "#9A8478"
-                    onChangeText={setMiddleName}
-                />
-
-                <TextInput
-                    style={styles.input}
-                    placeholder={"LastName"}
-                    placeholderTextColor = "#9A8478"
-                    onChangeText={setLastName}
-                />
-
-                <TextInput
-                    style={styles.input}
-                    placeholder={"Email"}
-                    placeholderTextColor = "#9A8478"
-                    autoCapitalize="none"
-                    keyboardType="email-address"
-                    onChangeText={setEmail}
-                />
-
-                <TextInput
-                    style={styles.input}
-                    placeholder={"Cellphone Number"}
-                    placeholderTextColor = "#9A8478"
-                    keyboardType="phone-pad"
-                    onChangeText={setCellphone}
-                />
-
-                <TextInput
-                    style={styles.input}
-                    placeholder={"Password"}
-                    placeholderTextColor = "#9A8478"
-                    secureTextEntry
-                    onChangeText={setPassword}
-                />
-
-                <TextInput
-                    style={styles.input}
-                    placeholder={"Confirm Password"}
-                    placeholderTextColor = "#9A8478"
-                    secureTextEntry
-                    onChangeText={setConfirmPassword}
-                />
+                <TextInput style={styles.input} placeholder="First Name" placeholderTextColor="#9A8478" onChangeText={setFirstName} />
+                <TextInput style={styles.input} placeholder="Middle Name" placeholderTextColor="#9A8478" onChangeText={setMiddleName} />
+                <TextInput style={styles.input} placeholder="Last Name" placeholderTextColor="#9A8478" onChangeText={setLastName} />
+                <TextInput style={styles.input} placeholder="Email" placeholderTextColor="#9A8478" autoCapitalize="none" keyboardType="email-address" onChangeText={setEmail} />
+                <TextInput style={styles.input} placeholder="Cellphone Number" placeholderTextColor="#9A8478" keyboardType="phone-pad" onChangeText={setCellphone} />
+                <TextInput style={styles.input} placeholder="Password" placeholderTextColor="#9A8478" secureTextEntry onChangeText={setPassword} />
+                <TextInput style={styles.input} placeholder="Confirm Password" placeholderTextColor="#9A8478" secureTextEntry onChangeText={setConfirmPassword} />
 
                 <View style={styles.imagePickerContainer}>
                     <TouchableOpacity onPress={pickImage} style={styles.imagePicker}>
-                        <Text style={styles.imagePickerText}>Add Photo</Text>
+                        <Text style={styles.imagePickerText}>Upload Valid ID</Text>
                     </TouchableOpacity>
-
-                    <View style={styles.imageContainer}>
-                        {image && (
-                            <Text>{image.split('/').pop()}</Text>
-                        )}
-                    </View>
-
+                    <View style={styles.imageContainer}>{image && <Text>{image.split("/").pop()}</Text>}</View>
                 </View>
 
                 <TouchableOpacity style={styles.button} onPress={handleSignUp}>
                     <Text style={styles.buttonText}>Submit</Text>
                 </TouchableOpacity>
 
-                <View style={styles.line}/>
-
+                <View style={styles.line} />
                 <View style={styles.containerBottom}>
-                    <Text>Already have an Account?</Text>
-
+                    <Text>Already have an account?</Text>
                     <TouchableOpacity onPress={() => router.push("/(auth)/login")} style={styles.loginButton}>
                         <Text>Login</Text>
                     </TouchableOpacity>
@@ -187,6 +129,6 @@ const page = () => {
             </ScrollView>
         </View>
     );
-} ;
+};
 
-export default page;
+export default SignUpPage;

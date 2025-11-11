@@ -4,7 +4,7 @@ import { Alert, Image, Modal, ScrollView, Text, TextInput, TouchableOpacity, Vie
 import * as ImagePicker from "expo-image-picker";
 import { styles } from '@/assets/styles/addProductStyles';
 import { db, auth } from '@/firebaseConfig';
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, setDoc, doc, serverTimestamp } from "firebase/firestore";
 
 export default function AddProduct() {
     const router = useRouter();
@@ -21,11 +21,13 @@ export default function AddProduct() {
     const [showSubModal, setShowSubModal] = useState(false);
 
     const categories: Record<string, string[]> = {
-        Handicrafts: ["3D Printing","Arts","Bathroom","Crochet","Decor","Organizers","Pottery","Woodwork"],
-        Produce: ["Artisanal","Fruits","Grains","Vegetables"],
+        Handicrafts: ["3D Printing", "Arts", "Bathroom", "Crochet", "Decor", "Organizers", "Pottery", "Woodwork"],
+        Produce: ["Artisanal", "Fruits", "Grains", "Vegetables"],
     };
+
     const subOptions = categories[mainCategory] ?? [];
 
+    // Image picker
     const pickImage = async () => {
         const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (permission.status !== "granted") {
@@ -35,7 +37,7 @@ export default function AddProduct() {
         const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: true,
-            aspect: [4,3],
+            aspect: [4, 3],
             quality: 1,
             base64: true,
         });
@@ -45,6 +47,7 @@ export default function AddProduct() {
         }
     };
 
+
     const handleAddProduct = async () => {
         if (!userId) return;
         if (!productName || !mainCategory || !subcategory || !amount || !price) {
@@ -52,7 +55,17 @@ export default function AddProduct() {
             return;
         }
 
+        // Show alert before saving
+        Alert.alert(
+            "Pending Approval",
+            "This product will not be shown for the users until validated by the admin."
+        );
+
         try {
+
+            await setDoc(doc(db, "shops", userId), {}, { merge: true });
+
+
             await addDoc(collection(db, "shops", userId, "products"), {
                 productName,
                 mainCategory,
@@ -61,10 +74,12 @@ export default function AddProduct() {
                 description,
                 price: Number(price),
                 photo: productPhoto || null,
+                productStatus: "pending",
                 createdAt: serverTimestamp(),
                 updatedAt: serverTimestamp(),
             });
-            Alert.alert("Success", "Product added!");
+
+            Alert.alert("Success", "Product added and awaiting validation!");
             router.back();
         } catch (err) {
             console.error(err);
@@ -76,11 +91,11 @@ export default function AddProduct() {
         <View style={styles.container}>
             <View style={{ flexDirection: "row", marginTop: 50 }}>
                 <TouchableOpacity onPress={() => router.back()}>
-                    <Image source={require('../../assets/images/back.png')} style={styles.arrow}/>
+                    <Image source={require('../../assets/images/back.png')} style={styles.arrow} />
                 </TouchableOpacity>
                 <Text style={styles.headerText}>Add Product</Text>
             </View>
-            <View style={styles.line}/>
+            <View style={styles.line} />
 
             <ScrollView contentContainerStyle={styles.scrollContainer}>
                 <TouchableOpacity
@@ -105,7 +120,6 @@ export default function AddProduct() {
                     )}
                 </TouchableOpacity>
 
-
                 <View style={[styles.inputRow, styles.shadow]}>
                     <Text style={styles.label}>Product Name</Text>
                     <TextInput
@@ -116,7 +130,6 @@ export default function AddProduct() {
                         placeholderTextColor="#888888"
                     />
                 </View>
-
 
                 <View style={[styles.inputRow, styles.shadow]}>
                     <Text style={styles.label}>Product Category</Text>
@@ -129,7 +142,6 @@ export default function AddProduct() {
                         </Text>
                     </TouchableOpacity>
                 </View>
-
 
                 {mainCategory && (
                     <View style={[styles.inputRow, styles.shadow]}>
@@ -144,7 +156,6 @@ export default function AddProduct() {
                         </TouchableOpacity>
                     </View>
                 )}
-
 
                 <View style={[styles.amountContainer, styles.shadow]}>
                     <Text style={styles.label}>Amount</Text>
@@ -174,7 +185,6 @@ export default function AddProduct() {
                         </TouchableOpacity>
                     </View>
                 </View>
-
 
                 <View style={[styles.inputRowColumn, styles.shadow]}>
                     <Text style={styles.label}>Product Description</Text>
@@ -210,14 +220,14 @@ export default function AddProduct() {
                 </View>
             </ScrollView>
 
-
+            {/* Modal for Main Category */}
             <Modal visible={showMainModal} transparent animationType="fade">
                 <View style={styles.modalOverlay}>
                     <View style={styles.modalBox}>
                         {Object.keys(categories).map(cat => (
                             <TouchableOpacity
                                 key={cat}
-                                onPress={() => { setMainCategory(cat); setSubcategory(""); setShowMainModal(false); }}
+                                onPress={() => { setMainCategory(cat); setShowMainModal(false); }}
                                 style={styles.modalOption}
                             >
                                 <Text style={styles.modalText}>{cat}</Text>
@@ -227,6 +237,7 @@ export default function AddProduct() {
                 </View>
             </Modal>
 
+            {/* Modal for Subcategory */}
             <Modal visible={showSubModal} transparent animationType="fade">
                 <View style={styles.modalOverlay}>
                     <View style={styles.modalBox}>
