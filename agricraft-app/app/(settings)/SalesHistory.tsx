@@ -78,14 +78,13 @@ export default function SalesHistory() {
                 setTopProduct(products.reduce((prev, curr) => (curr.sold > prev.sold ? curr : prev)));
             }
 
-            // Update total products sold
             setProductsSold(products.reduce((sum, p) => sum + (p.sold || 0), 0));
         });
 
         return () => unsubscribeProducts();
     }, [userId]);
 
-    // Fetch orders for sales counts
+    // Fetch orders and calculate total sales
     useEffect(() => {
         if (!userId) return;
 
@@ -101,7 +100,10 @@ export default function SalesHistory() {
                 if (order.shopId !== userId) return; // only this shop's orders
 
                 const status = (order.status || "").toLowerCase();
+                const amount = Number(order.amount) || 0;
+                const price = Number(order.price) || 0;
 
+                // Count order statuses
                 switch (status) {
                     case "unpaid":
                     case "to receive":
@@ -123,11 +125,10 @@ export default function SalesHistory() {
                 }
 
                 orderCount += 1;
-                customerSet.add(order.userId);
+                if (order.userId) customerSet.add(order.userId);
 
-                // Total sales for completed orders
-                if (["completed", "to rate"].includes(status)) {
-                    salesTotal += Number(order.total || 0);
+                if (["to ship", "shipped", "completed"].includes(status)) {
+                    salesTotal += price * amount;
                 }
             });
 
